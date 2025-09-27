@@ -1,23 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import { StyleSheet, ScrollView, View, TouchableOpacity, Text } from 'react-native';
 import { Appbar, Button, Card, Title, Paragraph } from 'react-native-paper';
 import QuarterCard from '../components/QuarterCard';
-import { initDatabase, getSettings, getTotals } from '../services/storageService';
+import { initDatabase, getSettings, getTotals, getCurrency } from '../services/storageService';
+
+const currencyOptions = [
+    { label: 'USD', symbol: '$', icon: 'currency-usd' },
+    { label: 'EUR', symbol: '€', icon: 'currency-eur' },
+    { label: 'GBP', symbol: '£', icon: 'currency-gbp' },
+    { label: 'JPY', symbol: '¥', icon: 'currency-jpy' },
+    { label: 'INR', symbol: '₹', icon: 'currency-inr' },
+];
 
 const HomeScreen = ({ navigation }) => {
+    const currentYear = new Date().getFullYear();
+    const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
+
     const [settings, setSettings] = useState({
-        year: new Date().getFullYear(),
+        year: currentYear,
         q1_start: '',
         q2_start: '',
         q3_start: '',
         q4_start: ''
     });
+    const [selectedYear, setSelectedYear] = useState(currentYear);
     const [totals, setTotals] = useState({
         1: { income: 0, expenditure: 0 },
         2: { income: 0, expenditure: 0 },
         3: { income: 0, expenditure: 0 },
         4: { income: 0, expenditure: 0 }
     });
+    const [currency, setCurrency] = useState('USD');
 
     useEffect(() => {
         const loadData = async () => {
@@ -25,8 +38,7 @@ const HomeScreen = ({ navigation }) => {
                 await initDatabase();
                 const settingsData = await getSettings();
                 setSettings(settingsData);
-
-                const totalsData = await getTotals();
+                const totalsData = await getTotals(selectedYear);
                 const formattedTotals = {
                     1: { income: 0, expenditure: 0 },
                     2: { income: 0, expenditure: 0 },
@@ -42,6 +54,9 @@ const HomeScreen = ({ navigation }) => {
                 });
 
                 setTotals(formattedTotals);
+
+                const curr = await getCurrency();
+                setCurrency(curr);
             } catch (error) {
                 console.error('Error loading data:', error);
             }
@@ -51,7 +66,11 @@ const HomeScreen = ({ navigation }) => {
 
         const unsubscribe = navigation.addListener('focus', loadData);
         return unsubscribe;
-    }, [navigation]);
+    }, [navigation, selectedYear]);
+
+    const handleYearSelect = (year) => {
+        setSelectedYear(year);
+    };
 
     const calculateYearlyTotals = () => {
         let totalIncome = 0;
@@ -69,25 +88,49 @@ const HomeScreen = ({ navigation }) => {
         };
     };
 
+    const currencyObj = currencyOptions.find(c => c.label === currency) || currencyOptions[0];
+    const currencySymbol = currencyObj.symbol;
+    const currencyIcon = currencyObj.icon;
     const yearlyTotals = calculateYearlyTotals();
 
     return (
         <View style={styles.container}>
-            <Appbar.Header>
-                <Appbar.Content title={`Accounting ${settings.year}`} />
+            <Appbar.Header statusBarHeight={0}>
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.yearSelector}
+                >
+                    {yearOptions.map(year => (
+                        <TouchableOpacity
+                            key={year}
+                            style={[
+                                styles.yearButton,
+                                selectedYear === year && styles.yearButtonSelected
+                            ]}
+                            onPress={() => handleYearSelect(year)}
+                        >
+                            <Text style={[
+                                styles.yearText,
+                                selectedYear === year && styles.yearTextSelected
+                            ]}>
+                                {year}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </Appbar.Header>
-
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Card style={styles.summaryCard}>
                     <Card.Content>
                         <Title>Yearly Summary</Title>
-                        <Paragraph>Income: ${yearlyTotals.income.toFixed(2)}</Paragraph>
-                        <Paragraph>Expenditure: ${yearlyTotals.expenditure.toFixed(2)}</Paragraph>
+                        <Paragraph>Income: {currencySymbol}{yearlyTotals.income.toFixed(2)}</Paragraph>
+                        <Paragraph>Expenditure: {currencySymbol}{yearlyTotals.expenditure.toFixed(2)}</Paragraph>
                         <Paragraph style={{
                             fontWeight: 'bold',
                             color: yearlyTotals.balance >= 0 ? 'green' : 'red'
                         }}>
-                            Balance: ${yearlyTotals.balance.toFixed(2)}
+                            Balance: {currencySymbol}{yearlyTotals.balance.toFixed(2)}
                         </Paragraph>
                     </Card.Content>
                 </Card>
@@ -99,7 +142,9 @@ const HomeScreen = ({ navigation }) => {
                     startDate={settings.q1_start}
                     income={totals[1].income}
                     expenditure={totals[1].expenditure}
-                    onPress={() => navigation.navigate('Quarter', { quarter: 1, startDate: settings.q1_start })}
+                    onPress={() => navigation.navigate('Quarter', { quarter: 1, startDate: settings.q1_start, year: selectedYear })}
+                    currencySymbol={currencySymbol}
+                    currencyIcon={currencyIcon}
                 />
 
                 <QuarterCard
@@ -107,7 +152,9 @@ const HomeScreen = ({ navigation }) => {
                     startDate={settings.q2_start}
                     income={totals[2].income}
                     expenditure={totals[2].expenditure}
-                    onPress={() => navigation.navigate('Quarter', { quarter: 2, startDate: settings.q2_start })}
+                    onPress={() => navigation.navigate('Quarter', { quarter: 2, startDate: settings.q2_start, year: selectedYear })}
+                    currencySymbol={currencySymbol}
+                    currencyIcon={currencyIcon}
                 />
 
                 <QuarterCard
@@ -115,7 +162,9 @@ const HomeScreen = ({ navigation }) => {
                     startDate={settings.q3_start}
                     income={totals[3].income}
                     expenditure={totals[3].expenditure}
-                    onPress={() => navigation.navigate('Quarter', { quarter: 3, startDate: settings.q3_start })}
+                    onPress={() => navigation.navigate('Quarter', { quarter: 3, startDate: settings.q3_start, year: selectedYear })}
+                    currencySymbol={currencySymbol}
+                    currencyIcon={currencyIcon}
                 />
 
                 <QuarterCard
@@ -123,7 +172,9 @@ const HomeScreen = ({ navigation }) => {
                     startDate={settings.q4_start}
                     income={totals[4].income}
                     expenditure={totals[4].expenditure}
-                    onPress={() => navigation.navigate('Quarter', { quarter: 4, startDate: settings.q4_start })}
+                    onPress={() => navigation.navigate('Quarter', { quarter: 4, startDate: settings.q4_start, year: selectedYear })}
+                    currencySymbol={currencySymbol}
+                    currencyIcon={currencyIcon}
                 />
 
                 <Button
@@ -144,6 +195,37 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f5f5f5',
     },
+    yearSelector: {
+        flexDirection: 'row',
+        justifyContent: 'space-between', // Evenly space year buttons
+        alignItems: 'center',
+        paddingVertical: 12,
+        marginBottom: 4,
+        width: '100%',
+    },
+    yearButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 0, // Remove horizontal padding for equal spacing
+        borderRadius: 24,
+        backgroundColor: '#eee',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 60,
+        flex: 1, // Each button takes equal space
+        marginHorizontal: 2, // Small margin for separation
+    },
+    yearButtonSelected: {
+        backgroundColor: '#2196f3',
+    },
+    yearText: {
+        fontSize: 14,
+        color: '#333',
+    },
+    yearTextSelected: {
+        fontSize: 14,
+        color: '#fff',
+        fontWeight: 'bold',
+    },
     scrollContent: {
         padding: 16,
     },
@@ -160,4 +242,6 @@ const styles = StyleSheet.create({
     },
 });
 
+
 export default HomeScreen;
+

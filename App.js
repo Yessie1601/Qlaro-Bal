@@ -22,7 +22,7 @@ export default function App() {
   return (
       <PaperProvider theme={theme}>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="Home" id={}>
+          <Stack.Navigator initialRouteName="Home" id={"mainStack"}>
             <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Accounting App' }} />
             <Stack.Screen name="Quarter" component={QuarterScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />

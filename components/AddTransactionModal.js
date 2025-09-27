@@ -1,31 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { Modal, Portal, TextInput, Button, Title, HelperText } from 'react-native-paper';
 import moment from 'moment';
 
-const AddTransactionModal = ({ visible, onDismiss, onSave, type, quarter }) => {
+const AddTransactionModal = ({ visible, onDismiss, onSave, type, quarter, year }) => {
+    const today = moment();
+    const initialMonth = today.format('MM');
+    const initialDay = today.format('DD');
+
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
     const [tax, setTax] = useState('');
     const [receiptAmount, setReceiptAmount] = useState('');
-    const [date, setDate] = useState(moment().format('YYYY-MM-DD'));
+    const [month, setMonth] = useState(initialMonth);
+    const [day, setDay] = useState(initialDay);
     const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        if (visible) {
+            setMonth(initialMonth);
+            setDay(initialDay);
+        }
+    }, [year, visible]);
 
     const validateForm = () => {
         const newErrors = {};
-
         if (!description.trim()) newErrors.description = 'Description is required';
         if (!amount || isNaN(parseFloat(amount))) newErrors.amount = 'Valid amount is required';
         if (!tax || isNaN(parseFloat(tax))) newErrors.tax = 'Valid tax amount is required';
         if (!receiptAmount || isNaN(parseFloat(receiptAmount))) newErrors.receiptAmount = 'Valid receipt amount is required';
-        if (!date || !moment(date, 'YYYY-MM-DD', true).isValid()) newErrors.date = 'Valid date is required (YYYY-MM-DD)';
-
+        if (!month || !/^(0[1-9]|1[0-2])$/.test(month)) newErrors.month = 'Month must be 01-12';
+        if (!day || !/^(0[1-9]|[12][0-9]|3[01])$/.test(day)) newErrors.day = 'Day must be 01-31';
+        const dateStr = `${year}-${month}-${day}`;
+        if (!moment(dateStr, 'YYYY-MM-DD', true).isValid()) newErrors.date = 'Invalid date';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSave = () => {
         if (validateForm()) {
+            const dateStr = `${year}-${month}-${day}`;
             onSave({
                 quarter,
                 type,
@@ -33,7 +47,8 @@ const AddTransactionModal = ({ visible, onDismiss, onSave, type, quarter }) => {
                 amount: parseFloat(amount),
                 tax: parseFloat(tax),
                 receipt_amount: parseFloat(receiptAmount),
-                date
+                date: dateStr,
+                year
             });
             resetForm();
         }
@@ -44,7 +59,8 @@ const AddTransactionModal = ({ visible, onDismiss, onSave, type, quarter }) => {
         setAmount('');
         setTax('');
         setReceiptAmount('');
-        setDate(moment().format('YYYY-MM-DD'));
+        setMonth(initialMonth);
+        setDay(initialDay);
         setErrors({});
     };
 
@@ -98,15 +114,34 @@ const AddTransactionModal = ({ visible, onDismiss, onSave, type, quarter }) => {
                     />
                     {errors.receiptAmount && <HelperText type="error">{errors.receiptAmount}</HelperText>}
 
-                    <TextInput
-                        label="Date (YYYY-MM-DD)"
-                        value={date}
-                        onChangeText={setDate}
-                        style={styles.input}
-                        placeholder="YYYY-MM-DD"
-                        error={!!errors.date}
-                    />
-                    {errors.date && <HelperText type="error">{errors.date}</HelperText>}
+                    <View style={styles.dateRow}>
+                        <TextInput
+                            label="Month (MM)"
+                            value={month}
+                            onChangeText={setMonth}
+                            keyboardType="number-pad"
+                            style={[styles.input, styles.dateInput]}
+                            maxLength={2}
+                            error={!!errors.month}
+                        />
+                        <TextInput
+                            label="Day (DD)"
+                            value={day}
+                            onChangeText={setDay}
+                            keyboardType="number-pad"
+                            style={[styles.input, styles.dateInput]}
+                            maxLength={2}
+                            error={!!errors.day}
+                        />
+                        <View style={styles.yearBox}>
+                            <Title style={styles.yearText}>{year}</Title>
+                        </View>
+                    </View>
+                    {(errors.month || errors.day || errors.date) && (
+                        <HelperText type="error">
+                            {errors.month || errors.day || errors.date}
+                        </HelperText>
+                    )}
 
                     <View style={styles.buttonContainer}>
                         <Button onPress={onCancel} style={styles.button}>Cancel</Button>
@@ -130,6 +165,27 @@ const styles = StyleSheet.create({
     },
     input: {
         marginVertical: 8,
+    },
+    dateRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 8,
+    },
+    dateInput: {
+        flex: 1,
+        marginRight: 8,
+    },
+    yearBox: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        backgroundColor: '#eee',
+        borderRadius: 6,
+        height: 56,
+    },
+    yearText: {
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     buttonContainer: {
         flexDirection: 'row',

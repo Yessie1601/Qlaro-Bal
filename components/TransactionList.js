@@ -3,16 +3,16 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { List, Divider, Text, FAB } from 'react-native-paper';
 import moment from 'moment';
 
-const TransactionList = ({ transactions, type, onAddPress }) => {
+const TransactionList = ({ transactions, type, onAddPress, currencySymbol = '$' }) => {
     const renderItem = ({ item }) => (
         <List.Item
             title={item.description}
             description={`Date: ${moment(item.date).format('MMM D, YYYY')}`}
             right={() => (
                 <View style={styles.amountsContainer}>
-                    <Text style={styles.amount}>${item.amount.toFixed(2)}</Text>
-                    <Text style={styles.taxInfo}>Tax: ${item.tax.toFixed(2)}</Text>
-                    <Text style={styles.receiptInfo}>Receipt: ${item.receipt_amount.toFixed(2)}</Text>
+                    <Text style={styles.amount}>{currencySymbol}{item.amount.toFixed(2)}</Text>
+                    <Text style={styles.taxInfo}>Tax: {currencySymbol}{item.tax.toFixed(2)}</Text>
+                    <Text style={styles.receiptInfo}>Receipt: {currencySymbol}{item.receipt_amount.toFixed(2)}</Text>
                 </View>
             )}
         />
