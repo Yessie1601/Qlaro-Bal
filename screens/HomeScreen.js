@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, TouchableOpacity, Text } from 'react-native';
-import { Appbar, Button, Card, Title, Paragraph } from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {Button, Card, Paragraph, Title} from 'react-native-paper';
 import QuarterCard from '../components/QuarterCard';
-import { initDatabase, getSettings, getTotals, getCurrency } from '../services/storageService';
+import {getCurrency, getSettings, getTotals, initDatabase} from '../services/storageService';
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -94,8 +95,8 @@ const HomeScreen = ({ navigation }) => {
     const yearlyTotals = calculateYearlyTotals();
 
     return (
-        <View style={styles.container}>
-            <Appbar.Header statusBarHeight={0}>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.yearSelectorContainer}>
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -119,7 +120,7 @@ const HomeScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
-            </Appbar.Header>
+            </View>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Card style={styles.summaryCard}>
                     <Card.Content>
@@ -186,7 +187,7 @@ const HomeScreen = ({ navigation }) => {
                     Settings
                 </Button>
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -195,34 +196,30 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f5f5f5',
     },
-    yearSelector: {
+    yearSelector:{
         flexDirection: 'row',
-        justifyContent: 'space-between', // Evenly space year buttons
         alignItems: 'center',
-        paddingVertical: 12,
-        marginBottom: 4,
-        width: '100%',
+        justifyContent: 'center',
+        overflow: 'visible',
     },
     yearButton: {
         paddingVertical: 10,
-        paddingHorizontal: 0, // Remove horizontal padding for equal spacing
         borderRadius: 24,
         backgroundColor: '#eee',
         alignItems: 'center',
         justifyContent: 'center',
-        minWidth: 60,
-        flex: 1, // Each button takes equal space
-        marginHorizontal: 2, // Small margin for separation
+        width: 80,
+        marginHorizontal: 4,
     },
     yearButtonSelected: {
-        backgroundColor: '#2196f3',
+        backgroundColor: '#581423',
     },
     yearText: {
-        fontSize: 14,
+        fontSize: 20,
         color: '#333',
     },
     yearTextSelected: {
-        fontSize: 14,
+        fontSize: 20,
         color: '#fff',
         fontWeight: 'bold',
     },
@@ -240,8 +237,11 @@ const styles = StyleSheet.create({
         marginTop: 24,
         marginBottom: 16,
     },
+    yearSelectorContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+    },
 });
 
-
 export default HomeScreen;
-

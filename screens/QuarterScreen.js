@@ -1,10 +1,9 @@
-// screens/QuarterScreen.js
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Divider } from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, Text, TouchableOpacity, useWindowDimensions, View} from 'react-native';
+import {Button, Divider, Modal, Paragraph, Portal} from 'react-native-paper';
 import TransactionList from '../components/TransactionList';
 import AddTransactionModal from '../components/AddTransactionModal';
-import { getTransactions, addTransaction, getCurrency } from '../services/storageService';
+import {addTransaction, getCurrency, getTransactions} from '../services/storageService';
 import moment from 'moment';
 
 const currencyOptions = [
@@ -15,6 +14,8 @@ const currencyOptions = [
     { label: 'INR', symbol: '₹', icon: 'currency-inr' },
 ];
 
+const PHONE_WIDTH = 600;
+
 const QuarterScreen = ({ navigation, route }) => {
     const { quarter, startDate, year } = route.params;
     const [incomeTransactions, setIncomeTransactions] = useState([]);
@@ -22,6 +23,11 @@ const QuarterScreen = ({ navigation, route }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [currentType, setCurrentType] = useState('income');
     const [currency, setCurrency] = useState('USD');
+    const [activeList, setActiveList] = useState('income');
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const { width } = useWindowDimensions();
+    const isPhone = width < PHONE_WIDTH;
 
     useEffect(() => {
         navigation.setOptions({
@@ -76,6 +82,11 @@ const QuarterScreen = ({ navigation, route }) => {
         }
     };
 
+    const handleTransactionPress = (transaction) => {
+        setSelectedTransaction(transaction);
+        setDetailModalVisible(true);
+    };
+
     const currencyObj = currencyOptions.find(c => c.label === currency) || currencyOptions[0];
     const currencySymbol = currencyObj.symbol;
     const currencyIcon = currencyObj.icon;
@@ -90,28 +101,105 @@ const QuarterScreen = ({ navigation, route }) => {
                 quarter={quarter}
                 year={route.params.year}
             />
-            <View style={styles.listsContainer}>
-                <View style={styles.listContainer}>
-                    <TransactionList
-                        transactions={incomeTransactions}
-                        type="income"
-                        onAddPress={handleAddPress}
-                        currencySymbol={currencySymbol}
-                        currencyIcon={currencyIcon}
-                    />
+            <Portal>
+                <Modal
+                    visible={detailModalVisible}
+                    onDismiss={() => setDetailModalVisible(false)}
+                    contentContainerStyle={{ margin: 24, backgroundColor: 'white', padding: 24, borderRadius: 8 }}
+                >
+                    {selectedTransaction && (
+                        <>
+                            <Paragraph>Amount: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Paragraph>
+                            <Paragraph>Tax: {currencySymbol}{selectedTransaction.tax.toFixed(2)}</Paragraph>
+                            <Paragraph>Receipt: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Paragraph>
+                            <Paragraph>Date: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Paragraph>
+                            <Paragraph>Type: {selectedTransaction.type}</Paragraph>
+                            <Paragraph>Quarter: {selectedTransaction.quarter}</Paragraph>
+                            <Paragraph>Description: {selectedTransaction.description}</Paragraph>
+                            <Button onPress={() => setDetailModalVisible(false)} style={{ marginTop: 16 }}>Close</Button>
+                        </>
+                    )}
+                </Modal>
+            </Portal>
+            {isPhone ? (
+                <View style={styles.toggleContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.toggleButton,
+                            activeList === 'income' && styles.toggleButtonActive
+                        ]}
+                        onPress={() => setActiveList('income')}
+                    >
+                        <Text style={activeList === 'income' ? styles.toggleTextActive : styles.toggleText}>Income</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.toggleButton,
+                            activeList === 'expenditure' && styles.toggleButtonActive
+                        ]}
+                        onPress={() => setActiveList('expenditure')}
+                    >
+                        <Text style={activeList === 'expenditure' ? styles.toggleTextActive : styles.toggleText}>Expenditure</Text>
+                    </TouchableOpacity>
+                    <Button
+                        mode="contained"
+                        style={styles.addButton}
+                        onPress={() => handleAddPress(activeList)}
+                    >
+                        +
+                    </Button>
                 </View>
-
-                <Divider style={styles.divider} />
-
-                <View style={styles.listContainer}>
-                    <TransactionList
-                        transactions={expenditureTransactions}
-                        type="expenditure"
-                        onAddPress={handleAddPress}
-                        currencySymbol={currencySymbol}
-                        currencyIcon={currencyIcon}
-                    />
+            ) : null}
+            {!isPhone && (
+                <View style={styles.titlesContainer}>
+                    <View style={styles.titleWithButton}>
+                        <Text style={styles.listTitle}>Income</Text>
+                        <Button
+                            mode="contained"
+                            style={styles.addButton}
+                            icon="plus"
+                            onPress={() => handleAddPress('income')}
+                        >
+                            Add
+                        </Button>
+                    </View>
+                    <View style={styles.titleWithButton}>
+                        <Text style={styles.listTitle}>Expenditure</Text>
+                        <Button
+                            mode="contained"
+                            style={styles.addButton}
+                            icon="plus"
+                            onPress={() => handleAddPress('expenditure')}
+                        >
+                            Add
+                        </Button>
+                    </View>
                 </View>
+            )}
+            <View style={isPhone ? styles.singleListContainer : styles.listsContainer}>
+                {(!isPhone || activeList === 'income') && (
+                    <View style={styles.listContainer}>
+                        <TransactionList
+                            transactions={incomeTransactions}
+                            type="income"
+                            currencySymbol={currencySymbol}
+                            currencyIcon={currencyIcon}
+                            onTransactionPress={handleTransactionPress}
+                        />
+                    </View>
+                )}
+                {!isPhone && <Divider style={styles.divider} />}
+                {(!isPhone || activeList === 'expenditure') && (
+                    <View style={styles.listContainer}>
+                        <TransactionList
+                            transactions={expenditureTransactions}
+                            type="expenditure"
+                            currencySymbol={currencySymbol}
+                            currencyIcon={currencyIcon}
+                            onTransactionPress={handleTransactionPress}
+                        />
+                    </View>
+                )}
             </View>
         </View>
     );
@@ -126,6 +214,9 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
     },
+    singleListContainer: {
+        flex: 1,
+    },
     listContainer: {
         flex: 1,
         paddingHorizontal: 8,
@@ -134,7 +225,51 @@ const styles = StyleSheet.create({
         width: 1,
         backgroundColor: '#e0e0e0',
     },
+    toggleContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 8,
+    },
+    toggleButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+        backgroundColor: '#eee',
+        marginHorizontal: 8,
+    },
+    toggleButtonActive: {
+        backgroundColor: '#581423',
+    },
+    toggleText: {
+        color: '#333',
+        fontWeight: 'bold',
+    },
+    toggleTextActive: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    titlesContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        marginTop: 16,
+        marginBottom: 4,
+    },
+    titleWithButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    listTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+        marginRight: 8,
+    },
+    addButton: {
+        marginLeft: 4,
+        marginVertical: 0,
+    },
 });
 
 export default QuarterScreen;
-

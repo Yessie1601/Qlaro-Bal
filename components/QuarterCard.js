@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Card, Title, Paragraph, Button } from 'react-native-paper';
+import {StyleSheet, View} from 'react-native';
+import {Card, Title, Paragraph, Button} from 'react-native-paper';
 import moment from 'moment';
 
-const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currencySymbol = '$' }) => {
+const QuarterCard = ({quarter, startDate, income, expenditure, onPress, currencySymbol = '$'}) => {
     const formattedDate = moment(startDate).format('MMM D');
     const balance = income - expenditure;
 
@@ -19,7 +19,7 @@ const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currenc
                     <Paragraph>Expenditure: {currencySymbol}{expenditure.toFixed(2)}</Paragraph>
                 </View>
                 <View style={styles.row}>
-                    <Paragraph style={{ fontWeight: 'bold', color: balance >= 0 ? 'green' : 'red' }}>
+                    <Paragraph style={{fontWeight: 'bold', color: balance >= 0 ? 'green' : 'red'}}>
                         Balance: {currencySymbol}{balance.toFixed(2)}
                     </Paragraph>
                 </View>

@@ -16,14 +16,11 @@ const currencyOptions = [
 const parseQuarterStart = (str) => {
     const parts = str.split('-');
     if (parts.length === 2) {
-        // MM-DD
         return { month: parts[0], day: parts[1] };
     }
     if (parts.length === 3) {
-        // YYYY-MM-DD
         return { month: parts[1], day: parts[2] };
     }
-    // fallback
     return { month: '01', day: '01' };
 };
 
@@ -222,17 +219,16 @@ const SettingsScreen = ({ navigation }) => {
             </Button>
             <Divider style={styles.divider} />
             <Title style={styles.sectionTitle}>Currency</Title>
-            <View style={{ marginBottom: 12 }}>
+            <View>
                 <Menu
                     visible={menuVisible}
                     onDismiss={() => setMenuVisible(false)}
                     anchor={
                         <Button
-                            icon={selectedCurrency?.icon}
                             mode="outlined"
                             onPress={() => setMenuVisible(true)}
                         >
-                            {selectedCurrency?.label}
+                            {selectedCurrency?.symbol} {selectedCurrency?.label} {' '}
                         </Button>
                     }
                 >
@@ -243,7 +239,7 @@ const SettingsScreen = ({ navigation }) => {
                                 setCurrencyState(option.label);
                                 setMenuVisible(false);
                             }}
-                            title={`${option.label} ${option.symbol}`}
+                            title={`${option.label}`}
                             leadingIcon={option.icon}
                         />
                     ))}
@@ -257,7 +253,6 @@ const SettingsScreen = ({ navigation }) => {
                 Save Currency
             </Button>
             <Divider style={styles.divider} />
-            <Title style={styles.sectionTitle}>Data Management</Title>
             <Button
                 mode="contained"
                 icon="export"
@@ -280,15 +275,11 @@ const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        padding: 10,
         backgroundColor: '#f5f5f5',
     },
     sectionTitle: {
-        marginVertical: 16,
-    },
-    yearBox: {
-        marginBottom: 12,
-        alignItems: 'flex-start',
+        marginVertical: 8,
     },
     inputHalf: {
         flex: 1,
@@ -302,10 +293,7 @@ const styles = StyleSheet.create({
     },
     button: {
         marginVertical: 8,
-    },
-    divider: {
-        marginVertical: 24,
-    },
+    }
 });
 
 export default SettingsScreen;

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
-import { Modal, Portal, TextInput, Button, Title, HelperText } from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {ScrollView, StyleSheet, View} from 'react-native';
+import {Button, HelperText, Modal, Portal, TextInput, Title} from 'react-native-paper';
 import moment from 'moment';
 
-const AddTransactionModal = ({ visible, onDismiss, onSave, type, quarter, year }) => {
+const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) => {
     const today = moment();
     const initialMonth = today.format('MM');
     const initialDay = today.format('DD');
@@ -95,7 +95,7 @@ const AddTransactionModal = ({ visible, onDismiss, onSave, type, quarter, year }
                     {errors.amount && <HelperText type="error">{errors.amount}</HelperText>}
 
                     <TextInput
-                        label="Tax"
+                        label="Tax (%)"
                         value={tax}
                         onChangeText={setTax}
                         keyboardType="decimal-pad"
