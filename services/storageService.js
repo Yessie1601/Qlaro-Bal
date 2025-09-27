@@ -14,10 +14,10 @@ export const initDatabase = async () => {
             const defaultSettings = {
                 id: 1,
                 year: currentYear,
-                q1_start: `${currentYear}-01-01`,
-                q2_start: `${currentYear}-04-01`,
-                q3_start: `${currentYear}-07-01`,
-                q4_start: `${currentYear}-10-01`
+                q1_start: '01-01',
+                q2_start: '04-01',
+                q3_start: '07-01',
+                q4_start: '10-01'
             };
             await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
         }
@@ -41,7 +41,9 @@ export const getSettings = async () => {
     throw new Error('No settings found');
 };
 
-export const updateSettings = async (year, q1_start, q2_start, q3_start, q4_start) => {
+export const updateSettings = async (q1_start, q2_start, q3_start, q4_start) => {
+    const settings = await getSettings();
+    const year = settings.year || new Date().getFullYear();
     const newSettings = { id: 1, year, q1_start, q2_start, q3_start, q4_start };
     await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
 

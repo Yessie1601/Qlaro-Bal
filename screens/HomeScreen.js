@@ -139,7 +139,7 @@ const HomeScreen = ({ navigation }) => {
 
                 <QuarterCard
                     quarter={1}
-                    startDate={settings.q1_start}
+                    startDate={`${selectedYear}-${settings.q1_start}`}
                     income={totals[1].income}
                     expenditure={totals[1].expenditure}
                     onPress={() => navigation.navigate('Quarter', { quarter: 1, startDate: settings.q1_start, year: selectedYear })}
@@ -149,7 +149,7 @@ const HomeScreen = ({ navigation }) => {
 
                 <QuarterCard
                     quarter={2}
-                    startDate={settings.q2_start}
+                    startDate={`${selectedYear}-${settings.q2_start}`}
                     income={totals[2].income}
                     expenditure={totals[2].expenditure}
                     onPress={() => navigation.navigate('Quarter', { quarter: 2, startDate: settings.q2_start, year: selectedYear })}
@@ -159,7 +159,7 @@ const HomeScreen = ({ navigation }) => {
 
                 <QuarterCard
                     quarter={3}
-                    startDate={settings.q3_start}
+                    startDate={`${selectedYear}-${settings.q3_start}`}
                     income={totals[3].income}
                     expenditure={totals[3].expenditure}
                     onPress={() => navigation.navigate('Quarter', { quarter: 3, startDate: settings.q3_start, year: selectedYear })}
@@ -169,7 +169,7 @@ const HomeScreen = ({ navigation }) => {
 
                 <QuarterCard
                     quarter={4}
-                    startDate={settings.q4_start}
+                    startDate={`${selectedYear}-${settings.q4_start}`}
                     income={totals[4].income}
                     expenditure={totals[4].expenditure}
                     onPress={() => navigation.navigate('Quarter', { quarter: 4, startDate: settings.q4_start, year: selectedYear })}

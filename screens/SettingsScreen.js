@@ -13,6 +13,20 @@ const currencyOptions = [
     { label: 'INR', symbol: '₹', icon: 'currency-inr' },
 ];
 
+const parseQuarterStart = (str) => {
+    const parts = str.split('-');
+    if (parts.length === 2) {
+        // MM-DD
+        return { month: parts[0], day: parts[1] };
+    }
+    if (parts.length === 3) {
+        // YYYY-MM-DD
+        return { month: parts[1], day: parts[2] };
+    }
+    // fallback
+    return { month: '01', day: '01' };
+};
+
 const SettingsScreen = ({ navigation }) => {
     const [q1Month, setQ1Month] = useState('01');
     const [q1Day, setQ1Day] = useState('01');
@@ -26,7 +40,6 @@ const SettingsScreen = ({ navigation }) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
     useEffect(() => {
         loadSettings();
@@ -38,26 +51,25 @@ const SettingsScreen = ({ navigation }) => {
     const loadSettings = async () => {
         try {
             const settings = await getSettings();
-            setSelectedYear(settings.year || new Date().getFullYear());
             if (settings.q1_start) {
-                const [m, d] = settings.q1_start.split('-');
-                setQ1Month(m);
-                setQ1Day(d);
+                const { month, day } = parseQuarterStart(settings.q1_start);
+                setQ1Month(month);
+                setQ1Day(day);
             }
             if (settings.q2_start) {
-                const [m, d] = settings.q2_start.split('-');
-                setQ2Month(m);
-                setQ2Day(d);
+                const { month, day } = parseQuarterStart(settings.q2_start);
+                setQ2Month(month);
+                setQ2Day(day);
             }
             if (settings.q3_start) {
-                const [m, d] = settings.q3_start.split('-');
-                setQ3Month(m);
-                setQ3Day(d);
+                const { month, day } = parseQuarterStart(settings.q3_start);
+                setQ3Month(month);
+                setQ3Day(day);
             }
             if (settings.q4_start) {
-                const [m, d] = settings.q4_start.split('-');
-                setQ4Month(m);
-                setQ4Day(d);
+                const { month, day } = parseQuarterStart(settings.q4_start);
+                setQ4Month(month);
+                setQ4Day(day);
             }
         } catch (error) {
             showSnackbar('Error loading settings');
@@ -80,11 +92,10 @@ const SettingsScreen = ({ navigation }) => {
                 return;
             }
             await updateSettings(
-                selectedYear,
-                `${selectedYear}-${q1Month}-${q1Day}`,
-                `${selectedYear}-${q2Month}-${q2Day}`,
-                `${selectedYear}-${q3Month}-${q3Day}`,
-                `${selectedYear}-${q4Month}-${q4Day}`
+                `${q1Month}-${q1Day}`,
+                `${q2Month}-${q2Day}`,
+                `${q3Month}-${q3Day}`,
+                `${q4Month}-${q4Day}`
             );
             showSnackbar('Settings saved successfully');
         } catch (error) {
@@ -102,12 +113,12 @@ const SettingsScreen = ({ navigation }) => {
     };
 
     const validateSettings = () => {
-        const dateFormat = 'YYYY-MM-DD';
+        const dateFormat = 'MM-DD';
         return (
-            moment(`${selectedYear}-${q1Month}-${q1Day}`, dateFormat, true).isValid() &&
-            moment(`${selectedYear}-${q2Month}-${q2Day}`, dateFormat, true).isValid() &&
-            moment(`${selectedYear}-${q3Month}-${q3Day}`, dateFormat, true).isValid() &&
-            moment(`${selectedYear}-${q4Month}-${q4Day}`, dateFormat, true).isValid()
+            moment(`${q1Month}-${q1Day}`, dateFormat, true).isValid() &&
+            moment(`${q2Month}-${q2Day}`, dateFormat, true).isValid() &&
+            moment(`${q3Month}-${q3Day}`, dateFormat, true).isValid() &&
+            moment(`${q4Month}-${q4Day}`, dateFormat, true).isValid()
         );
     };
 
@@ -298,4 +309,5 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreen;
+
 
