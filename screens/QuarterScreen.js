@@ -16,7 +16,7 @@ const currencyOptions = [
 
 const PHONE_WIDTH = 600;
 
-const QuarterScreen = ({ navigation, route }) => {
+const QuarterScreen = ({ navigation, route, theme }) => {
     const { quarter, startDate, year } = route.params;
     const [incomeTransactions, setIncomeTransactions] = useState([]);
     const [expenditureTransactions, setExpenditureTransactions] = useState([]);
@@ -92,31 +92,31 @@ const QuarterScreen = ({ navigation, route }) => {
     const currencyIcon = currencyObj.icon;
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <AddTransactionModal
                 visible={modalVisible}
                 onDismiss={() => setModalVisible(false)}
                 onSave={handleSaveTransaction}
                 type={currentType}
                 quarter={quarter}
-                year={route.params.year}
+                year={year}
             />
             <Portal>
                 <Modal
                     visible={detailModalVisible}
                     onDismiss={() => setDetailModalVisible(false)}
-                    contentContainerStyle={{ margin: 24, backgroundColor: 'white', padding: 24, borderRadius: 8 }}
+                    contentContainerStyle={{ margin: 24, backgroundColor: theme.colors.surface, padding: 24, borderRadius: 8 }}
                 >
                     {selectedTransaction && (
                         <>
-                            <Paragraph>Amount: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Paragraph>
-                            <Paragraph>Tax: {currencySymbol}{selectedTransaction.tax.toFixed(2)}</Paragraph>
-                            <Paragraph>Receipt: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Paragraph>
-                            <Paragraph>Date: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Paragraph>
-                            <Paragraph>Type: {selectedTransaction.type}</Paragraph>
-                            <Paragraph>Quarter: {selectedTransaction.quarter}</Paragraph>
-                            <Paragraph>Description: {selectedTransaction.description}</Paragraph>
-                            <Button onPress={() => setDetailModalVisible(false)} style={{ marginTop: 16 }}>Close</Button>
+                            <Paragraph style={{ color: theme.colors.text }}>Amount: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Paragraph>
+                            <Paragraph style={{ color: theme.colors.text }}>Tax: {currencySymbol}{selectedTransaction.tax.toFixed(2)}</Paragraph>
+                            <Paragraph style={{ color: theme.colors.text }}>Receipt: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Paragraph>
+                            <Paragraph style={{ color: theme.colors.text }}>Date: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Paragraph>
+                            <Paragraph style={{ color: theme.colors.text }}>Type: {selectedTransaction.type}</Paragraph>
+                            <Paragraph style={{ color: theme.colors.text }}>Quarter: {selectedTransaction.quarter}</Paragraph>
+                            <Paragraph style={{ color: theme.colors.text }}>Description: {selectedTransaction.description}</Paragraph>
+                            <Button onPress={() => setDetailModalVisible(false)} style={{ marginTop: 16, backgroundColor: theme.colors.button }} labelStyle={{ color: theme.colors.text }}>Close</Button>
                         </>
                     )}
                 </Modal>
@@ -126,24 +126,25 @@ const QuarterScreen = ({ navigation, route }) => {
                     <TouchableOpacity
                         style={[
                             styles.toggleButton,
-                            activeList === 'income' && styles.toggleButtonActive
+                            activeList === 'income' && { backgroundColor: theme.colors.primary }
                         ]}
                         onPress={() => setActiveList('income')}
                     >
-                        <Text style={activeList === 'income' ? styles.toggleTextActive : styles.toggleText}>Income</Text>
+                        <Text style={activeList === 'income' ? { color: theme.colors.text, fontWeight: 'bold' } : { color: theme.colors.text }}>Income</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[
                             styles.toggleButton,
-                            activeList === 'expenditure' && styles.toggleButtonActive
+                            activeList === 'expenditure' && { backgroundColor: theme.colors.primary }
                         ]}
                         onPress={() => setActiveList('expenditure')}
                     >
-                        <Text style={activeList === 'expenditure' ? styles.toggleTextActive : styles.toggleText}>Expenditure</Text>
+                        <Text style={activeList === 'expenditure' ? { color: theme.colors.text, fontWeight: 'bold' } : { color: theme.colors.text }}>Expenditure</Text>
                     </TouchableOpacity>
                     <Button
                         mode="contained"
-                        style={styles.addButton}
+                        style={[styles.addButton, { backgroundColor: theme.colors.button }]}
+                        labelStyle={{ color: theme.colors.text }}
                         onPress={() => handleAddPress(activeList)}
                     >
                         +
@@ -153,22 +154,24 @@ const QuarterScreen = ({ navigation, route }) => {
             {!isPhone && (
                 <View style={styles.titlesContainer}>
                     <View style={styles.titleWithButton}>
-                        <Text style={styles.listTitle}>Income</Text>
+                        <Text style={[styles.listTitle, { color: theme.colors.text }]}>Income</Text>
                         <Button
                             mode="contained"
-                            style={styles.addButton}
+                            style={[styles.addButton, { backgroundColor: theme.colors.button }]}
                             icon="plus"
+                            labelStyle={{ color: theme.colors.text }}
                             onPress={() => handleAddPress('income')}
                         >
                             Add
                         </Button>
                     </View>
                     <View style={styles.titleWithButton}>
-                        <Text style={styles.listTitle}>Expenditure</Text>
+                        <Text style={[styles.listTitle, { color: theme.colors.text }]}>Expenditure</Text>
                         <Button
                             mode="contained"
-                            style={styles.addButton}
+                            style={[styles.addButton, { backgroundColor: theme.colors.button }]}
                             icon="plus"
+                            labelStyle={{ color: theme.colors.text }}
                             onPress={() => handleAddPress('expenditure')}
                         >
                             Add
@@ -185,10 +188,11 @@ const QuarterScreen = ({ navigation, route }) => {
                             currencySymbol={currencySymbol}
                             currencyIcon={currencyIcon}
                             onTransactionPress={handleTransactionPress}
+                            theme={theme}
                         />
                     </View>
                 )}
-                {!isPhone && <Divider style={styles.divider} />}
+                {!isPhone && <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />}
                 {(!isPhone || activeList === 'expenditure') && (
                     <View style={styles.listContainer}>
                         <TransactionList
@@ -197,6 +201,7 @@ const QuarterScreen = ({ navigation, route }) => {
                             currencySymbol={currencySymbol}
                             currencyIcon={currencyIcon}
                             onTransactionPress={handleTransactionPress}
+                            theme={theme}
                         />
                     </View>
                 )}
@@ -208,7 +213,6 @@ const QuarterScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
     },
     listsContainer: {
         flex: 1,
@@ -223,7 +227,6 @@ const styles = StyleSheet.create({
     },
     divider: {
         width: 1,
-        backgroundColor: '#e0e0e0',
     },
     toggleContainer: {
         flexDirection: 'row',
@@ -235,19 +238,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 20,
-        backgroundColor: '#eee',
         marginHorizontal: 8,
-    },
-    toggleButtonActive: {
-        backgroundColor: '#581423',
-    },
-    toggleText: {
-        color: '#333',
-        fontWeight: 'bold',
-    },
-    toggleTextActive: {
-        color: '#fff',
-        fontWeight: 'bold',
     },
     titlesContainer: {
         flexDirection: 'row',
@@ -263,7 +254,6 @@ const styles = StyleSheet.create({
     listTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
         marginRight: 8,
     },
     addButton: {
@@ -273,3 +263,4 @@ const styles = StyleSheet.create({
 });
 
 export default QuarterScreen;
+

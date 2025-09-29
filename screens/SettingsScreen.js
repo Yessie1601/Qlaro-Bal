@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View } from 'react-native';
-import { TextInput, Button, Divider, Snackbar, Title, Menu, Switch, useTheme } from 'react-native-paper';
+import { TextInput, Button, Divider, Snackbar, Title, Menu, Switch } from 'react-native-paper';
 import * as Sharing from 'expo-sharing';
 import { getSettings, updateSettings, exportData, getCurrency, setCurrency } from '../services/storageService';
 import moment from 'moment';
@@ -25,8 +25,7 @@ const parseQuarterStart = (str) => {
     return { month: '01', day: '01' };
 };
 
-const SettingsScreen = ({ navigation, darkMode, setDarkMode }) => {
-    const theme = useTheme();
+const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [q1Month, setQ1Month] = useState('01');
     const [q1Day, setQ1Day] = useState('01');
     const [q2Month, setQ2Month] = useState('04');
@@ -149,6 +148,50 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode }) => {
 
     return (
         <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+            <View style={styles.row}>
+                <Title style={{flex: 1, color: theme.colors.text}}>Dark Mode</Title>
+                <Switch value={darkMode} onValueChange={handleToggleDarkMode} color={theme.colors.button} />
+            </View>
+            <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
+            <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Currency</Title>
+            <View>
+                <Menu
+                    visible={menuVisible}
+                    onDismiss={() => setMenuVisible(false)}
+                    anchor={
+                        <Button
+                            mode="outlined"
+                            onPress={() => setMenuVisible(true)}
+                            labelStyle={{ color: theme.colors.text }}
+                        >
+                            {selectedCurrency?.symbol} {selectedCurrency?.label} {' '}
+                        </Button>
+                    }
+                    contentStyle={{ backgroundColor: theme.colors.surface }}
+                >
+                    {currencyOptions.map(option => (
+                        <Menu.Item
+                            key={option.label}
+                            onPress={() => {
+                                setCurrencyState(option.label);
+                                setMenuVisible(false);
+                            }}
+                            title={`${option.label}`}
+                            leadingIcon={option.icon}
+                            titleStyle={{ color: theme.colors.text }}
+                        />
+                    ))}
+                </Menu>
+            </View>
+            <Button
+                mode="contained"
+                onPress={handleSaveCurrency}
+                style={[styles.button, { backgroundColor: theme.colors.button }]}
+                labelStyle={{ color: theme.colors.text }}
+            >
+                Save Currency
+            </Button>
+            <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
             <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Quarter Dates</Title>
             <View style={styles.row}>
                 <TextInput
@@ -233,61 +276,17 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode }) => {
             <Button
                 mode="contained"
                 onPress={handleSaveSettings}
-                style={styles.button}
+                style={[styles.button, { backgroundColor: theme.colors.button }]}
                 labelStyle={{ color: theme.colors.text }}
             >
                 Save Settings
             </Button>
             <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
-            <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Currency</Title>
-            <View>
-                <Menu
-                    visible={menuVisible}
-                    onDismiss={() => setMenuVisible(false)}
-                    anchor={
-                        <Button
-                            mode="outlined"
-                            onPress={() => setMenuVisible(true)}
-                            labelStyle={{ color: theme.colors.text }}
-                        >
-                            {selectedCurrency?.symbol} {selectedCurrency?.label} {' '}
-                        </Button>
-                    }
-                    contentStyle={{ backgroundColor: theme.colors.surface }}
-                >
-                    {currencyOptions.map(option => (
-                        <Menu.Item
-                            key={option.label}
-                            onPress={() => {
-                                setCurrencyState(option.label);
-                                setMenuVisible(false);
-                            }}
-                            title={`${option.label}`}
-                            leadingIcon={option.icon}
-                            titleStyle={{ color: theme.colors.text }}
-                        />
-                    ))}
-                </Menu>
-            </View>
-            <Button
-                mode="contained"
-                onPress={handleSaveCurrency}
-                style={styles.button}
-                labelStyle={{ color: theme.colors.text }}
-            >
-                Save Currency
-            </Button>
-            <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
-            <View style={styles.row}>
-                <Title style={{flex: 1, color: theme.colors.text}}>Dark Mode</Title>
-                <Switch value={darkMode} onValueChange={handleToggleDarkMode} color={theme.colors.primary} />
-            </View>
-            <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
             <Button
                 mode="contained"
                 icon="export"
                 onPress={handleExportData}
-                style={styles.button}
+                style={[styles.button, { backgroundColor: theme.colors.button }]}
                 labelStyle={{ color: theme.colors.text }}
             >
                 Export Data
@@ -332,4 +331,3 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreen;
-

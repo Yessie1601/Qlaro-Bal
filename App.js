@@ -10,28 +10,34 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator();
 
-const darkTheme = {
-    ...DefaultTheme,
-    colors: {
-        ...DefaultTheme.colors,
-        primary: '#8d3f21',
-        accent: '#581423',
-        background: '#181818',
-        surface: '#222',
-        text: '#fff',
-    },
-    dark: true,
-};
-
 const lightTheme = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,
-        primary: '#8d3f21',
-        accent: '#581423',
+        primary: '#68291a',
+        accent: '#937f75',
+        background: '#7d4d33',
+        surface: '#937f75',
+        text: '#fff',
+        button: '#937f75',
     },
     dark: false,
 };
+
+const darkTheme = {
+    ...DefaultTheme,
+    colors: {
+        ...DefaultTheme.colors,
+        primary: '#68291a',
+        accent: '#937f75',
+        background: '#68291a',
+        surface: '#7d4d33',
+        text: '#fff',
+        button: '#7d4d33',
+    },
+    dark: true,
+};
+
 
 export default function App() {
     const [darkMode, setDarkMode] = useState(false);
@@ -47,7 +53,7 @@ export default function App() {
 
     return (
         <PaperProvider theme={theme}>
-            <NavigationContainer>
+            <NavigationContainer theme={theme}>
                 <Stack.Navigator
                     initialRouteName="Home"
                     id={"mainStack"}
@@ -57,23 +63,26 @@ export default function App() {
                         headerTitleStyle: { color: theme.colors.text },
                     }}
                 >
-                    <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-                    <Stack.Screen name="Quarter" component={QuarterScreen} />
-                    <Stack.Screen
-                        name="Settings"
-                        options={{ title: 'Settings' }}
-                    >
+                    <Stack.Screen name="Home" options={{ headerShown: false }} >
+                        {props => <HomeScreen {...props} theme={theme}/>}
+                    </Stack.Screen>
+                    <Stack.Screen name="Quarter">
+                        {props => <QuarterScreen {...props} theme={theme} />}
+                    </Stack.Screen>
+                    <Stack.Screen name="Settings">
                         {props => (
                             <SettingsScreen
                                 {...props}
                                 darkMode={darkMode}
                                 setDarkMode={setDarkMode}
+                                theme={theme}
                             />
                         )}
                     </Stack.Screen>
+
                 </Stack.Navigator>
             </NavigationContainer>
-            <StatusBar style={darkMode ? "light" : "auto"} />
+            <StatusBar style="light" />
         </PaperProvider>
     );
 }
