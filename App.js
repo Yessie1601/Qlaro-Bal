@@ -6,6 +6,7 @@ import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import HomeScreen from './screens/HomeScreen';
 import QuarterScreen from './screens/QuarterScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import IntroScreen from './screens/IntroScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator();
@@ -16,7 +17,7 @@ const lightTheme = {
         ...DefaultTheme.colors,
         primary: '#68291a',
         accent: '#937f75',
-        background: '#7d4d33',
+        background: '#B2A496',
         surface: '#937f75',
         text: '#fff',
         button: '#937f75',
@@ -38,24 +39,28 @@ const darkTheme = {
     dark: true,
 };
 
-
 export default function App() {
     const [darkMode, setDarkMode] = useState(false);
+    const [introSeen, setIntroSeen] = useState(null);
 
     useEffect(() => {
         (async () => {
             const value = await AsyncStorage.getItem('darkMode');
             setDarkMode(value === 'true');
+            const intro = await AsyncStorage.getItem('introSeen');
+            setIntroSeen(intro === 'true');
         })();
     }, []);
 
     const theme = darkMode ? darkTheme : lightTheme;
 
+    if (introSeen === null) return null; // Wait for AsyncStorage
+
     return (
         <PaperProvider theme={theme}>
             <NavigationContainer theme={theme}>
                 <Stack.Navigator
-                    initialRouteName="Home"
+                    initialRouteName={introSeen ? "Home" : "Intro"}
                     id={"mainStack"}
                     screenOptions={{
                         headerStyle: { backgroundColor: theme.colors.surface },
@@ -63,6 +68,9 @@ export default function App() {
                         headerTitleStyle: { color: theme.colors.text },
                     }}
                 >
+                    <Stack.Screen name="Intro" options={{ headerShown: false }}>
+                        {props => <IntroScreen {...props} theme={theme} />}
+                    </Stack.Screen>
                     <Stack.Screen name="Home" options={{ headerShown: false }} >
                         {props => <HomeScreen {...props} theme={theme}/>}
                     </Stack.Screen>
@@ -79,7 +87,6 @@ export default function App() {
                             />
                         )}
                     </Stack.Screen>
-
                 </Stack.Navigator>
             </NavigationContainer>
             <StatusBar style="light" />

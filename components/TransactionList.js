@@ -2,7 +2,14 @@ import React from 'react';
 import { FlatList } from 'react-native';
 import TransactionCard from './TransactionCard';
 
-const TransactionList = ({ transactions, type, currencySymbol, currencyIcon, onTransactionPress }) => (
+const TransactionList = ({
+                             transactions,
+                             type,
+                             currencySymbol,
+                             currencyIcon,
+                             onTransactionPress,
+                             theme
+                         }) => (
     <FlatList
         data={transactions}
         keyExtractor={item => item.id.toString()}
@@ -14,6 +21,7 @@ const TransactionList = ({ transactions, type, currencySymbol, currencyIcon, onT
                 currencyIcon={currencyIcon}
                 compact={true}
                 onPress={() => onTransactionPress && onTransactionPress(item)}
+                theme={theme}
             />
         )}
     />

@@ -23,6 +23,17 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
         }
     }, [year, visible]);
 
+    // Auto-calculate receiptAmount when amount or tax changes
+    useEffect(() => {
+        const amt = parseFloat(amount);
+        const tx = parseFloat(tax);
+        if (!isNaN(amt) && !isNaN(tx)) {
+            setReceiptAmount((amt + (amt * tx / 100)).toFixed(2));
+        } else {
+            setReceiptAmount('');
+        }
+    }, [amount, tax]);
+
     const validateForm = () => {
         const newErrors = {};
         if (!description.trim()) newErrors.description = 'Description is required';

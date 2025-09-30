@@ -5,6 +5,7 @@ import * as Sharing from 'expo-sharing';
 import { getSettings, updateSettings, exportData, getCurrency, setCurrency } from '../services/storageService';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -89,7 +90,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const handleSaveSettings = async () => {
         try {
             if (!validateSettings()) {
-                showSnackbar('Please enter valid month and day for each quarter');
+                showSnackbar('Invalid quarter dates');
                 return;
             }
             await updateSettings(
@@ -147,159 +148,167 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const selectedCurrency = currencyOptions.find(c => c.label === currency);
 
     return (
-        <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <View style={styles.row}>
-                <Title style={{flex: 1, color: theme.colors.text}}>Dark Mode</Title>
-                <Switch value={darkMode} onValueChange={handleToggleDarkMode} color={theme.colors.button} />
-            </View>
-            <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
-            <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Currency</Title>
-            <View>
-                <Menu
-                    visible={menuVisible}
-                    onDismiss={() => setMenuVisible(false)}
-                    anchor={
-                        <Button
-                            mode="outlined"
-                            onPress={() => setMenuVisible(true)}
-                            labelStyle={{ color: theme.colors.text }}
-                        >
-                            {selectedCurrency?.symbol} {selectedCurrency?.label} {' '}
-                        </Button>
-                    }
-                    contentStyle={{ backgroundColor: theme.colors.surface }}
+        <LinearGradient
+            colors={theme.dark
+                ? ['#68291a','#7d4d33', '#a0522d' ]
+                : ['#d2bfa6', '#e7dacb', '#f8f4ef']
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ flex: 1 }}
+        >
+            <ScrollView style={[styles.container, { backgroundColor: 'transparent' }]}>
+                <View style={styles.row}>
+                    <Title style={{flex: 1, color: theme.colors.text}}>Dark Mode</Title>
+                    <Switch value={darkMode} onValueChange={handleToggleDarkMode} color={theme.colors.button} />
+                </View>
+                <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
+                <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Currency</Title>
+                <View>
+                    <Menu
+                        visible={menuVisible}
+                        onDismiss={() => setMenuVisible(false)}
+                        anchor={
+                            <Button
+                                mode="outlined"
+                                onPress={() => setMenuVisible(true)}
+                                style={{ borderColor: theme.colors.button }}
+                                labelStyle={{ color: theme.colors.text }}
+                            >
+                                {selectedCurrency ? `${selectedCurrency.label} (${selectedCurrency.symbol})` : 'Select Currency'}
+                            </Button>
+                        }
+                    >
+                        {currencyOptions.map(option => (
+                            <Menu.Item
+                                key={option.label}
+                                onPress={() => {
+                                    setCurrencyState(option.label);
+                                    setMenuVisible(false);
+                                }}
+                                title={`${option.label} (${option.symbol})`}
+                            />
+                        ))}
+                    </Menu>
+                </View>
+                <Button
+                    mode="contained"
+                    onPress={handleSaveCurrency}
+                    style={[styles.button, { backgroundColor: theme.colors.button }]}
+                    labelStyle={{ color: theme.colors.text }}
                 >
-                    {currencyOptions.map(option => (
-                        <Menu.Item
-                            key={option.label}
-                            onPress={() => {
-                                setCurrencyState(option.label);
-                                setMenuVisible(false);
-                            }}
-                            title={`${option.label}`}
-                            leadingIcon={option.icon}
-                            titleStyle={{ color: theme.colors.text }}
-                        />
-                    ))}
-                </Menu>
-            </View>
-            <Button
-                mode="contained"
-                onPress={handleSaveCurrency}
-                style={[styles.button, { backgroundColor: theme.colors.button }]}
-                labelStyle={{ color: theme.colors.text }}
-            >
-                Save Currency
-            </Button>
-            <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
-            <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Quarter Dates</Title>
-            <View style={styles.row}>
-                <TextInput
-                    label="Q1 Month (MM)"
-                    value={q1Month}
-                    onChangeText={setQ1Month}
-                    style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
-                />
-                <TextInput
-                    label="Q1 Day (DD)"
-                    value={q1Day}
-                    onChangeText={setQ1Day}
-                    style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
-                />
-            </View>
-            <View style={styles.row}>
-                <TextInput
-                    label="Q2 Month (MM)"
-                    value={q2Month}
-                    onChangeText={setQ2Month}
-                    style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
-                />
-                <TextInput
-                    label="Q2 Day (DD)"
-                    value={q2Day}
-                    onChangeText={setQ2Day}
-                    style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
-                />
-            </View>
-            <View style={styles.row}>
-                <TextInput
-                    label="Q3 Month (MM)"
-                    value={q3Month}
-                    onChangeText={setQ3Month}
-                    style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
-                />
-                <TextInput
-                    label="Q3 Day (DD)"
-                    value={q3Day}
-                    onChangeText={setQ3Day}
-                    style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
-                />
-            </View>
-            <View style={styles.row}>
-                <TextInput
-                    label="Q4 Month (MM)"
-                    value={q4Month}
-                    onChangeText={setQ4Month}
-                    style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
-                />
-                <TextInput
-                    label="Q4 Day (DD)"
-                    value={q4Day}
-                    onChangeText={setQ4Day}
-                    style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
-                    keyboardType="number-pad"
-                    maxLength={2}
-                    theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
-                />
-            </View>
-            <Button
-                mode="contained"
-                onPress={handleSaveSettings}
-                style={[styles.button, { backgroundColor: theme.colors.button }]}
-                labelStyle={{ color: theme.colors.text }}
-            >
-                Save Settings
-            </Button>
-            <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
-            <Button
-                mode="contained"
-                icon="export"
-                onPress={handleExportData}
-                style={[styles.button, { backgroundColor: theme.colors.button }]}
-                labelStyle={{ color: theme.colors.text }}
-            >
-                Export Data
-            </Button>
-            <Snackbar
-                visible={snackbarVisible}
-                onDismiss={() => setSnackbarVisible(false)}
-                duration={3000}
-                style={{ backgroundColor: theme.colors.surface }}
-            >
-                <Title style={{ color: theme.colors.text, fontSize: 16 }}>{snackbarMessage}</Title>
-            </Snackbar>
-        </ScrollView>
+                    Save Currency
+                </Button>
+                <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
+                <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Quarter Dates</Title>
+                <View style={styles.row}>
+                    <TextInput
+                        label="Q1 Month (MM)"
+                        value={q1Month}
+                        onChangeText={setQ1Month}
+                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                    />
+                    <TextInput
+                        label="Q1 Day (DD)"
+                        value={q1Day}
+                        onChangeText={setQ1Day}
+                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                    />
+                </View>
+                <View style={styles.row}>
+                    <TextInput
+                        label="Q2 Month (MM)"
+                        value={q2Month}
+                        onChangeText={setQ2Month}
+                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                    />
+                    <TextInput
+                        label="Q2 Day (DD)"
+                        value={q2Day}
+                        onChangeText={setQ2Day}
+                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                    />
+                </View>
+                <View style={styles.row}>
+                    <TextInput
+                        label="Q3 Month (MM)"
+                        value={q3Month}
+                        onChangeText={setQ3Month}
+                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                    />
+                    <TextInput
+                        label="Q3 Day (DD)"
+                        value={q3Day}
+                        onChangeText={setQ3Day}
+                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                    />
+                </View>
+                <View style={styles.row}>
+                    <TextInput
+                        label="Q4 Month (MM)"
+                        value={q4Month}
+                        onChangeText={setQ4Month}
+                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                    />
+                    <TextInput
+                        label="Q4 Day (DD)"
+                        value={q4Day}
+                        onChangeText={setQ4Day}
+                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        keyboardType="number-pad"
+                        maxLength={2}
+                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                    />
+                </View>
+                <Button
+                    mode="contained"
+                    onPress={handleSaveSettings}
+                    style={[styles.button, { backgroundColor: theme.colors.button }]}
+                    labelStyle={{ color: theme.colors.text }}
+                >
+                    Save Settings
+                </Button>
+                <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
+                <Button
+                    mode="contained"
+                    icon="export"
+                    onPress={handleExportData}
+                    style={[styles.button, { backgroundColor: theme.colors.button }]}
+                    labelStyle={{ color: theme.colors.text }}
+                >
+                    Export Data
+                </Button>
+                <Snackbar
+                    visible={snackbarVisible}
+                    onDismiss={() => setSnackbarVisible(false)}
+                    duration={3000}
+                    style={{ backgroundColor: theme.colors.surface }}
+                >
+                    <Title style={{ color: theme.colors.text, fontSize: 16 }}>{snackbarMessage}</Title>
+                </Snackbar>
+            </ScrollView>
+        </LinearGradient>
     );
 };
 
@@ -331,3 +340,4 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreen;
+

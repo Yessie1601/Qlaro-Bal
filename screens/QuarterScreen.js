@@ -5,6 +5,7 @@ import TransactionList from '../components/TransactionList';
 import AddTransactionModal from '../components/AddTransactionModal';
 import {addTransaction, getCurrency, getTransactions} from '../services/storageService';
 import moment from 'moment';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -92,121 +93,159 @@ const QuarterScreen = ({ navigation, route, theme }) => {
     const currencyIcon = currencyObj.icon;
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <AddTransactionModal
-                visible={modalVisible}
-                onDismiss={() => setModalVisible(false)}
-                onSave={handleSaveTransaction}
-                type={currentType}
-                quarter={quarter}
-                year={year}
-            />
-            <Portal>
-                <Modal
-                    visible={detailModalVisible}
-                    onDismiss={() => setDetailModalVisible(false)}
-                    contentContainerStyle={{ margin: 24, backgroundColor: theme.colors.surface, padding: 24, borderRadius: 8 }}
-                >
-                    {selectedTransaction && (
-                        <>
-                            <Paragraph style={{ color: theme.colors.text }}>Amount: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Paragraph>
-                            <Paragraph style={{ color: theme.colors.text }}>Tax: {currencySymbol}{selectedTransaction.tax.toFixed(2)}</Paragraph>
-                            <Paragraph style={{ color: theme.colors.text }}>Receipt: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Paragraph>
-                            <Paragraph style={{ color: theme.colors.text }}>Date: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Paragraph>
-                            <Paragraph style={{ color: theme.colors.text }}>Type: {selectedTransaction.type}</Paragraph>
-                            <Paragraph style={{ color: theme.colors.text }}>Quarter: {selectedTransaction.quarter}</Paragraph>
-                            <Paragraph style={{ color: theme.colors.text }}>Description: {selectedTransaction.description}</Paragraph>
-                            <Button onPress={() => setDetailModalVisible(false)} style={{ marginTop: 16, backgroundColor: theme.colors.button }} labelStyle={{ color: theme.colors.text }}>Close</Button>
-                        </>
+        <LinearGradient
+            colors={theme.dark
+                ? ['#68291a', '#a0522d', '#7d4d33']
+                : ['#d2bfa6', '#e7dacb', '#f8f4ef']
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={{ flex: 1 }}
+        >
+            <View style={[styles.container, { backgroundColor: 'transparent' }]}>
+                <AddTransactionModal
+                    visible={modalVisible}
+                    onDismiss={() => setModalVisible(false)}
+                    onSave={handleSaveTransaction}
+                    type={currentType}
+                    quarter={quarter}
+                    year={year}
+                />
+                <Portal>
+                    <Modal
+                        visible={detailModalVisible}
+                        onDismiss={() => setDetailModalVisible(false)}
+                        contentContainerStyle={{ margin: 24, backgroundColor: theme.colors.surface, padding: 24, borderRadius: 8 }}
+                    >
+                        {selectedTransaction && (
+                            <>
+                                <Paragraph style={{ color: theme.colors.text }}>Quarter: {selectedTransaction.quarter}</Paragraph>
+                                <Paragraph style={{ color: theme.colors.text }}>Date: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Paragraph>
+                                <Paragraph style={{ color: theme.colors.text }}>Type: {selectedTransaction.type}</Paragraph>
+                                <Paragraph style={{ color: theme.colors.text }}>Amount: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Paragraph>
+                                <Paragraph style={{ color: theme.colors.text }}>Tax: {Math.round(selectedTransaction.tax)}%</Paragraph>
+                                <Paragraph style={{ color: theme.colors.text }}>Tax Value: {currencySymbol}{(selectedTransaction.amount * selectedTransaction.tax / 100).toFixed(2)}</Paragraph>
+                                <Paragraph style={{ color: theme.colors.text }}>Receipt: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Paragraph>
+                                <Paragraph style={{ color: theme.colors.text }}>Description: {selectedTransaction.description}</Paragraph>
+                                <Button onPress={() => setDetailModalVisible(false)} style={{ marginTop: 16, backgroundColor: theme.colors.button }} labelStyle={{ color: theme.colors.text }}>Close</Button>
+                            </>
+                        )}
+                    </Modal>
+                </Portal>
+                {isPhone ? (
+                    <View style={styles.toggleContainer}>
+                        <TouchableOpacity
+                            style={[
+                                styles.toggleButton,
+                                {
+                                    backgroundColor: activeList === 'income'
+                                        ? theme.colors.button
+                                        : theme.dark ? '#68291a' : '#fff',
+                                    borderColor: theme.colors.button,
+                                    borderWidth: 1,
+                                }
+                            ]}
+                            onPress={() => setActiveList('income')}
+                        >
+                            <Text style={{
+                                color: activeList === 'income'
+                                    ? theme.colors.text
+                                    : theme.colors.button,
+                                fontWeight: activeList === 'income' ? 'bold' : 'normal'
+                            }}>
+                                Income
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.toggleButton,
+                                {
+                                    backgroundColor: activeList === 'expenditure'
+                                        ? theme.colors.button
+                                        : theme.dark ? '#68291a' : '#fff',
+                                    borderColor: theme.colors.button,
+                                    borderWidth: 1,
+                                }
+                            ]}
+                            onPress={() => setActiveList('expenditure')}
+                        >
+                            <Text style={{
+                                color: activeList === 'expenditure'
+                                    ? theme.colors.text
+                                    : theme.colors.button,
+                                fontWeight: activeList === 'expenditure' ? 'bold' : 'normal'
+                            }}>
+                                Expenditure
+                            </Text>
+                        </TouchableOpacity>
+
+                        <Button
+                            mode="text"
+                            style={[styles.addButton, { backgroundColor: theme.colors.button }]}
+                            labelStyle={{ color: theme.colors.text }}
+                            onPress={() => handleAddPress(activeList)}
+                        >
+                            +
+                        </Button>
+                    </View>
+                ) : null}
+                {!isPhone && (
+                    <View style={styles.titlesContainer}>
+                        <View style={styles.titleWithButton}>
+                            <Text style={[styles.listTitle, { color: theme.colors.text }]}>Income</Text>
+                            <Button
+                                mode="contained"
+                                style={[styles.addButton, { backgroundColor: theme.colors.button }]}
+                                icon="plus"
+                                labelStyle={{ color: theme.colors.text }}
+                                onPress={() => handleAddPress('income')}
+                            >
+                                Add
+                            </Button>
+                        </View>
+                        <View style={styles.titleWithButton}>
+                            <Text style={[styles.listTitle, { color: theme.colors.text }]}>Expenditure</Text>
+                            <Button
+                                mode="contained"
+                                style={[styles.addButton, { backgroundColor: theme.colors.button }]}
+                                icon="plus"
+                                labelStyle={{ color: theme.colors.text }}
+                                onPress={() => handleAddPress('expenditure')}
+                            >
+                                Add
+                            </Button>
+                        </View>
+                    </View>
+                )}
+                <View style={isPhone ? styles.singleListContainer : styles.listsContainer}>
+                    {(!isPhone || activeList === 'income') && (
+                        <View style={styles.listContainer}>
+                            <TransactionList
+                                transactions={incomeTransactions}
+                                type="income"
+                                currencySymbol={currencySymbol}
+                                currencyIcon={currencyIcon}
+                                onTransactionPress={handleTransactionPress}
+                                theme={theme}
+                            />
+                        </View>
                     )}
-                </Modal>
-            </Portal>
-            {isPhone ? (
-                <View style={styles.toggleContainer}>
-                    <TouchableOpacity
-                        style={[
-                            styles.toggleButton,
-                            activeList === 'income' && { backgroundColor: theme.colors.primary }
-                        ]}
-                        onPress={() => setActiveList('income')}
-                    >
-                        <Text style={activeList === 'income' ? { color: theme.colors.text, fontWeight: 'bold' } : { color: theme.colors.text }}>Income</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[
-                            styles.toggleButton,
-                            activeList === 'expenditure' && { backgroundColor: theme.colors.primary }
-                        ]}
-                        onPress={() => setActiveList('expenditure')}
-                    >
-                        <Text style={activeList === 'expenditure' ? { color: theme.colors.text, fontWeight: 'bold' } : { color: theme.colors.text }}>Expenditure</Text>
-                    </TouchableOpacity>
-                    <Button
-                        mode="contained"
-                        style={[styles.addButton, { backgroundColor: theme.colors.button }]}
-                        labelStyle={{ color: theme.colors.text }}
-                        onPress={() => handleAddPress(activeList)}
-                    >
-                        +
-                    </Button>
+                    {!isPhone && <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />}
+                    {(!isPhone || activeList === 'expenditure') && (
+                        <View style={styles.listContainer}>
+                            <TransactionList
+                                transactions={expenditureTransactions}
+                                type="expenditure"
+                                currencySymbol={currencySymbol}
+                                currencyIcon={currencyIcon}
+                                onTransactionPress={handleTransactionPress}
+                                theme={theme}
+                            />
+                        </View>
+                    )}
                 </View>
-            ) : null}
-            {!isPhone && (
-                <View style={styles.titlesContainer}>
-                    <View style={styles.titleWithButton}>
-                        <Text style={[styles.listTitle, { color: theme.colors.text }]}>Income</Text>
-                        <Button
-                            mode="contained"
-                            style={[styles.addButton, { backgroundColor: theme.colors.button }]}
-                            icon="plus"
-                            labelStyle={{ color: theme.colors.text }}
-                            onPress={() => handleAddPress('income')}
-                        >
-                            Add
-                        </Button>
-                    </View>
-                    <View style={styles.titleWithButton}>
-                        <Text style={[styles.listTitle, { color: theme.colors.text }]}>Expenditure</Text>
-                        <Button
-                            mode="contained"
-                            style={[styles.addButton, { backgroundColor: theme.colors.button }]}
-                            icon="plus"
-                            labelStyle={{ color: theme.colors.text }}
-                            onPress={() => handleAddPress('expenditure')}
-                        >
-                            Add
-                        </Button>
-                    </View>
-                </View>
-            )}
-            <View style={isPhone ? styles.singleListContainer : styles.listsContainer}>
-                {(!isPhone || activeList === 'income') && (
-                    <View style={styles.listContainer}>
-                        <TransactionList
-                            transactions={incomeTransactions}
-                            type="income"
-                            currencySymbol={currencySymbol}
-                            currencyIcon={currencyIcon}
-                            onTransactionPress={handleTransactionPress}
-                            theme={theme}
-                        />
-                    </View>
-                )}
-                {!isPhone && <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />}
-                {(!isPhone || activeList === 'expenditure') && (
-                    <View style={styles.listContainer}>
-                        <TransactionList
-                            transactions={expenditureTransactions}
-                            type="expenditure"
-                            currencySymbol={currencySymbol}
-                            currencyIcon={currencyIcon}
-                            onTransactionPress={handleTransactionPress}
-                            theme={theme}
-                        />
-                    </View>
-                )}
             </View>
-        </View>
+        </LinearGradient>
     );
 };
 
