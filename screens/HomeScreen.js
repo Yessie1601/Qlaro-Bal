@@ -1,9 +1,7 @@
-// screens/HomeScreen.js
-
 import React, { useEffect, useState, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Card, Paragraph, Title } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import QuarterCard from '../components/QuarterCard';
 import { getCurrency, getSettings, getTotals, initDatabase } from '../services/storageService';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -122,115 +120,113 @@ const HomeScreen = ({ navigation, theme }) => {
             end={{ x: 0, y: 1 }}
             style={{ flex: 1 }}
         >
-            <SafeAreaView style={[{ backgroundColor: 'transparent' }]}>
-                <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
-                    <View>
-                        <LinearGradient
-                            colors={theme.dark
-                                ? ['#7d4d33', '#a0522d', '#68291a']
-                                : ['#d2bfa6', '#e7dacb','#f8f4ef' ]
-                            }
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 0, y: 1 }}
-                            style={styles.yearSummary}
-                        >
-                            <View style={{ alignItems: 'center', width: '100%' }}>
-                                <Text style={{ color: theme.colors.text, fontSize: 20, padding: 2 }}>
-                                    Income: {currencySymbol}{yearlyTotals.income.toFixed(2)}
-                                </Text>
-                                <Text style={{ color: theme.colors.text, fontSize: 20, padding: 2 }}>
-                                    Expenditure: {currencySymbol}{yearlyTotals.expenditure.toFixed(2)}
-                                </Text>
-                                <Text style={{
-                                    fontWeight: 'bold',
-                                    fontSize: 24,
-                                    color: yearlyTotals.balance >= 0 ? 'green' : 'red', padding: 2
-                                }}>
-                                    Balance: {currencySymbol}{yearlyTotals.balance.toFixed(2)}
-                                </Text>
-                                <View style={styles.yearSelectorContainer}>
-                                    <ScrollView
-                                        ref={scrollViewRef}
-                                        horizontal
-                                        showsHorizontalScrollIndicator={false}
-                                        contentContainerStyle={styles.yearSelector}
+            <SafeAreaView style={[{backgroundColor: 'transparent', flex: 1 }]}>
+                <LinearGradient
+                    colors={theme.dark
+                        ? ['#7d4d33', '#a0522d', '#68291a']
+                        : ['#d2bfa6', '#e7dacb','#f8f4ef' ]
+                    }
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={styles.yearSummary}
+                >
+                    <View style={{ alignItems: 'center', width: '100%' }}>
+                        <Text style={{ color: theme.colors.text, fontSize: 20, padding: 2 }}>
+                            Income: {currencySymbol}{yearlyTotals.income.toFixed(2)}
+                        </Text>
+                        <Text style={{ color: theme.colors.text, fontSize: 20, padding: 2 }}>
+                            Expenditure: {currencySymbol}{yearlyTotals.expenditure.toFixed(2)}
+                        </Text>
+                        <Text style={{
+                            fontWeight: 'bold',
+                            fontSize: 24,
+                            color: yearlyTotals.balance >= 0 ? 'green' : 'red', padding: 2
+                        }}>
+                            Balance: {currencySymbol}{yearlyTotals.balance.toFixed(2)}
+                        </Text>
+                        <View style={styles.yearSelectorContainer}>
+                            <ScrollView
+                                ref={scrollViewRef}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.yearSelector}
+                            >
+                                {yearOptions.map(year => (
+                                    <TouchableOpacity
+                                        key={year}
+                                        style={[
+                                            styles.yearButton,
+                                            selectedYear === year
+                                                ? { backgroundColor: theme.colors.button }
+                                                : { backgroundColor: theme.colors.background }
+                                        ]}
+                                        onPress={() => handleYearSelect(year)}
                                     >
-                                        {yearOptions.map(year => (
-                                            <TouchableOpacity
-                                                key={year}
-                                                style={[
-                                                    styles.yearButton,
-                                                    selectedYear === year
-                                                        ? { backgroundColor: theme.colors.button }
-                                                        : { backgroundColor: theme.colors.background }
-                                                ]}
-                                                onPress={() => handleYearSelect(year)}
-                                            >
-                                                <Text style={[
-                                                    styles.yearText,
-                                                    selectedYear === year
-                                                        ? { color: '#fff', fontWeight: 'bold' }
-                                                        : { color: '#fff' }
-                                                ]}>
-                                                    {year}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </ScrollView>
-                                </View>
-                            </View>
-                        </LinearGradient>
+                                        <Text style={[
+                                            styles.yearText,
+                                            selectedYear === year
+                                                ? { color: '#fff', fontWeight: 'bold' }
+                                                : { color: '#fff' }
+                                        ]}>
+                                            {year}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
                     </View>
+                </LinearGradient>
+                <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
                     <View style={styles.container}>
-                    <QuarterCard
-                        quarter={1}
-                        startDate={`${selectedYear}-${settings.q1_start}`}
-                        income={totals[1].income}
-                        expenditure={totals[1].expenditure}
-                        onPress={() => navigation.navigate('Quarter', { quarter: 1, startDate: settings.q1_start, year: selectedYear, theme })}
-                        currencySymbol={currencySymbol}
-                        currencyIcon={currencyIcon}
-                        theme={theme}
-                    />
-                    <QuarterCard
-                        quarter={2}
-                        startDate={`${selectedYear}-${settings.q2_start}`}
-                        income={totals[2].income}
-                        expenditure={totals[2].expenditure}
-                        onPress={() => navigation.navigate('Quarter', { quarter: 2, startDate: settings.q2_start, year: selectedYear, theme })}
-                        currencySymbol={currencySymbol}
-                        currencyIcon={currencyIcon}
-                        theme={theme}
-                    />
-                    <QuarterCard
-                        quarter={3}
-                        startDate={`${selectedYear}-${settings.q3_start}`}
-                        income={totals[3].income}
-                        expenditure={totals[3].expenditure}
-                        onPress={() => navigation.navigate('Quarter', { quarter: 3, startDate: settings.q3_start, year: selectedYear, theme })}
-                        currencySymbol={currencySymbol}
-                        currencyIcon={currencyIcon}
-                        theme={theme}
-                    />
-                    <QuarterCard
-                        quarter={4}
-                        startDate={`${selectedYear}-${settings.q4_start}`}
-                        income={totals[4].income}
-                        expenditure={totals[4].expenditure}
-                        onPress={() => navigation.navigate('Quarter', { quarter: 4, startDate: settings.q4_start, year: selectedYear, theme })}
-                        currencySymbol={currencySymbol}
-                        currencyIcon={currencyIcon}
-                        theme={theme}
-                    />
-                    <Button
-                        mode="contained"
-                        icon="cog"
-                        onPress={() => navigation.navigate('Settings')}
-                        style={[styles.settingsButton, { backgroundColor: theme.colors.button }]}
-                        labelStyle={{ color: theme.colors.text }}
-                    >
-                        Settings
-                    </Button>
+                        <QuarterCard
+                            quarter={1}
+                            startDate={`${selectedYear}-${settings.q1_start}`}
+                            income={totals[1].income}
+                            expenditure={totals[1].expenditure}
+                            onPress={() => navigation.navigate('Quarter', { quarter: 1, startDate: settings.q1_start, year: selectedYear, theme })}
+                            currencySymbol={currencySymbol}
+                            currencyIcon={currencyIcon}
+                            theme={theme}
+                        />
+                        <QuarterCard
+                            quarter={2}
+                            startDate={`${selectedYear}-${settings.q2_start}`}
+                            income={totals[2].income}
+                            expenditure={totals[2].expenditure}
+                            onPress={() => navigation.navigate('Quarter', { quarter: 2, startDate: settings.q2_start, year: selectedYear, theme })}
+                            currencySymbol={currencySymbol}
+                            currencyIcon={currencyIcon}
+                            theme={theme}
+                        />
+                        <QuarterCard
+                            quarter={3}
+                            startDate={`${selectedYear}-${settings.q3_start}`}
+                            income={totals[3].income}
+                            expenditure={totals[3].expenditure}
+                            onPress={() => navigation.navigate('Quarter', { quarter: 3, startDate: settings.q3_start, year: selectedYear, theme })}
+                            currencySymbol={currencySymbol}
+                            currencyIcon={currencyIcon}
+                            theme={theme}
+                        />
+                        <QuarterCard
+                            quarter={4}
+                            startDate={`${selectedYear}-${settings.q4_start}`}
+                            income={totals[4].income}
+                            expenditure={totals[4].expenditure}
+                            onPress={() => navigation.navigate('Quarter', { quarter: 4, startDate: settings.q4_start, year: selectedYear, theme })}
+                            currencySymbol={currencySymbol}
+                            currencyIcon={currencyIcon}
+                            theme={theme}
+                        />
+                        <Button
+                            mode="contained"
+                            icon="cog"
+                            onPress={() => navigation.navigate('Settings')}
+                            style={[styles.settingsButton, { backgroundColor: theme.colors.button }]}
+                            labelStyle={{ color: theme.colors.text }}
+                        >
+                            Settings
+                        </Button>
                     </View>
                 </ScrollView>
             </SafeAreaView>
@@ -241,9 +237,9 @@ const HomeScreen = ({ navigation, theme }) => {
 const styles = StyleSheet.create({
     yearSummary: {
         overflow: 'hidden',
-        marginHorizontal: 1,
-        paddingBottom: 10,
-        borderRadius: 50,
+        paddingBottom: 15,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20
     },
     yearSelectorContainer: {
         alignItems: 'center',
@@ -287,5 +283,4 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
-
 
