@@ -1,6 +1,8 @@
+// services/storageService.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import { writeAsStringAsync, documentDirectory } from 'expo-file-system/legacy';
 import moment from 'moment';
+import XLSX from 'xlsx';
 
 const SETTINGS_KEY = 'settings';
 const TRANSACTIONS_KEY = 'transactions';
@@ -46,8 +48,6 @@ export const updateSettings = async (q1_start, q2_start, q3_start, q4_start) => 
     const year = settings.year || new Date().getFullYear();
     const newSettings = { id: 1, year, q1_start, q2_start, q3_start, q4_start };
     await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
-
-    // Remove transactions not in the selected year
     const transactions = JSON.parse(await AsyncStorage.getItem(TRANSACTIONS_KEY)) || [];
     const filtered = transactions.filter(t => (t.year || new Date(t.date).getFullYear()) === year);
     await AsyncStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(filtered));
@@ -94,14 +94,50 @@ export const getTotals = async (year) => {
     return Object.values(totals);
 };
 
-export const exportData = async () => {
+export const exportData = async (year, quarter, type, fileType = 'xlsx') => {
     try {
-        const settings = await getSettings();
         const transactions = JSON.parse(await AsyncStorage.getItem(TRANSACTIONS_KEY)) || [];
-        const currency = await getCurrency();
-        const data = { settings, transactions, currency };
-        const fileUri = `${FileSystem.documentDirectory}accounting_export_${moment().format('YYYY-MM-DD_HH-mm')}.json`;
-        await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(data, null, 2));
+        let filtered = transactions;
+        if (year) filtered = filtered.filter(t => (t.year || new Date(t.date).getFullYear()) === year);
+        if (quarter && quarter !== 'All') filtered = filtered.filter(t => t.quarter === Number(quarter));
+        if (type && type !== 'Both') filtered = filtered.filter(t => t.type === type);
+
+        const sheetData = filtered.map(t => ({
+            ID: t.id,
+            Quarter: t.quarter,
+            Type: t.type,
+            Amount: t.amount,
+            Tax: t.tax,
+            'Receipt Amount': t.receipt_amount,
+            Description: t.description,
+            Date: t.date,
+            Year: t.year
+        }));
+
+        let fileName, fileUri;
+        if (fileType === 'csv') {
+            const header = Object.keys(sheetData[0] || {
+                ID: '', Quarter: '', Type: '', Amount: '', Tax: '', 'Receipt Amount': '', Description: '', Date: '', Year: ''
+            });
+            const csvRows = [
+                header.join(','),
+                ...sheetData.map(row =>
+                    header.map(key => `"${String(row[key] ?? '').replace(/"/g, '""')}"`).join(',')
+                )
+            ];
+            const csvContent = csvRows.join('\n');
+            fileName = `accounting_export_${year || 'all'}_${quarter || 'all'}_${type || 'both'}_${moment().format('YYYY-MM-DD_HH-mm')}.csv`;
+            fileUri = documentDirectory + fileName;
+            await writeAsStringAsync(fileUri, csvContent, { encoding: 'utf8' });
+        } else {
+            const ws = XLSX.utils.json_to_sheet(sheetData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
+            const xlsxData = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });
+            fileName = `accounting_export_${year || 'all'}_${quarter || 'all'}_${type || 'both'}_${moment().format('YYYY-MM-DD_HH-mm')}.xlsx`;
+            fileUri = documentDirectory + fileName;
+            await writeAsStringAsync(fileUri, xlsxData, { encoding: 'base64' });
+        }
         return fileUri;
     } catch (error) {
         console.error('Export error:', error);

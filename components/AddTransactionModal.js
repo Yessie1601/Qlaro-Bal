@@ -23,7 +23,6 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
         }
     }, [year, visible]);
 
-    // Auto-calculate receiptAmount when amount or tax changes
     useEffect(() => {
         const amt = parseFloat(amount);
         const tx = parseFloat(tax);
@@ -86,14 +85,34 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                 <ScrollView>
                     <Title style={styles.title}>Add {type === 'income' ? 'Income' : 'Expenditure'}</Title>
 
-                    <TextInput
-                        label="Description"
-                        value={description}
-                        onChangeText={setDescription}
-                        style={styles.input}
-                        error={!!errors.description}
-                    />
-                    {errors.description && <HelperText type="error">{errors.description}</HelperText>}
+                    <View style={styles.dateRow}>
+                        <TextInput
+                            label="Month (MM)"
+                            value={month}
+                            onChangeText={setMonth}
+                            keyboardType="number-pad"
+                            style={[styles.input, styles.dateInput]}
+                            maxLength={2}
+                            error={!!errors.month}
+                        />
+                        <TextInput
+                            label="Day (DD)"
+                            value={day}
+                            onChangeText={setDay}
+                            keyboardType="number-pad"
+                            style={[styles.input, styles.dateInput]}
+                            maxLength={2}
+                            error={!!errors.day}
+                        />
+                        <View style={styles.yearBox}>
+                            <Title style={styles.yearText}>{year}</Title>
+                        </View>
+                    </View>
+                    {(errors.month || errors.day || errors.date) && (
+                        <HelperText type="error">
+                            {errors.month || errors.day || errors.date}
+                        </HelperText>
+                    )}
 
                     <TextInput
                         label="Amount"
@@ -125,34 +144,14 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                     />
                     {errors.receiptAmount && <HelperText type="error">{errors.receiptAmount}</HelperText>}
 
-                    <View style={styles.dateRow}>
-                        <TextInput
-                            label="Month (MM)"
-                            value={month}
-                            onChangeText={setMonth}
-                            keyboardType="number-pad"
-                            style={[styles.input, styles.dateInput]}
-                            maxLength={2}
-                            error={!!errors.month}
-                        />
-                        <TextInput
-                            label="Day (DD)"
-                            value={day}
-                            onChangeText={setDay}
-                            keyboardType="number-pad"
-                            style={[styles.input, styles.dateInput]}
-                            maxLength={2}
-                            error={!!errors.day}
-                        />
-                        <View style={styles.yearBox}>
-                            <Title style={styles.yearText}>{year}</Title>
-                        </View>
-                    </View>
-                    {(errors.month || errors.day || errors.date) && (
-                        <HelperText type="error">
-                            {errors.month || errors.day || errors.date}
-                        </HelperText>
-                    )}
+                    <TextInput
+                        label="Description"
+                        value={description}
+                        onChangeText={setDescription}
+                        style={styles.input}
+                        error={!!errors.description}
+                    />
+                    {errors.description && <HelperText type="error">{errors.description}</HelperText>}
 
                     <View style={styles.buttonContainer}>
                         <Button onPress={onCancel} style={styles.button}>Cancel</Button>

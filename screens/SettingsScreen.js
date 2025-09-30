@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, Modal, Text } from 'react-native';
 import { TextInput, Button, Divider, Snackbar, Title, Switch } from 'react-native-paper';
 import * as Sharing from 'expo-sharing';
-import { getSettings, updateSettings, exportData, getCurrency, setCurrency } from '../services/storageService';
+import * as DocumentPicker from 'expo-document-picker';
+import XLSX from 'xlsx';
+import { getSettings, updateSettings, exportData, getCurrency, setCurrency, addTransaction } from '../services/storageService';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,6 +16,11 @@ const currencyOptions = [
     { label: 'GBP', symbol: '£', icon: 'currency-gbp' },
     { label: 'JPY', symbol: '¥', icon: 'currency-jpy' },
     { label: 'INR', symbol: '₹', icon: 'currency-inr' },
+];
+
+const fileTypeOptions = [
+    { label: 'Excel (.xlsx)', value: 'xlsx' },
+    { label: 'CSV (.csv)', value: 'csv' }
 ];
 
 const parseQuarterStart = (str) => {
@@ -41,11 +48,14 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [exportModalVisible, setExportModalVisible] = useState(false);
+    const [importModalVisible, setImportModalVisible] = useState(false);
+    const [importFileType, setImportFileType] = useState('xlsx');
     const currentYear = new Date().getFullYear();
     const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
     const [exportYear, setExportYear] = useState(currentYear);
     const [exportQuarter, setExportQuarter] = useState('All');
     const [exportType, setExportType] = useState('Both');
+    const [exportFileType, setExportFileType] = useState('xlsx');
 
     useEffect(() => {
         loadSettings();
@@ -145,12 +155,103 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const handleExportConfirm = async () => {
         setExportModalVisible(false);
         try {
-            const fileUri = await exportData(exportYear, exportQuarter, exportType);
-            await Sharing.shareAsync(fileUri);
+            const fileUri = await exportData(exportYear, exportQuarter, exportType, exportFileType);
+            const mimeType =
+                exportFileType === 'csv'
+                    ? 'text/csv'
+                    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            await Sharing.shareAsync(fileUri, {
+                mimeType,
+                dialogTitle: 'Share exported data'
+            });
+            showSnackbar(`Exported to: ${fileUri}`);
         } catch (error) {
             showSnackbar('Error exporting data');
         }
     };
+
+    const handleImportData = () => {
+        setImportModalVisible(true);
+    };
+
+    const handleImportConfirm = async () => {
+        setImportModalVisible(false);
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: importFileType === 'csv'
+                    ? 'text/csv'
+                    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+
+            const asset = result.assets && result.assets[0];
+            if (!asset || !asset.uri) {
+                showSnackbar('No file selected or file not accessible');
+                return;
+            }
+
+            let fileContent;
+            try {
+                fileContent = await fetch(asset.uri).then(res => res.arrayBuffer());
+            } catch (fetchError) {
+                showSnackbar('Unable to read file. Try downloading it locally first.');
+                return;
+            }
+
+            let importedData = [];
+            if (importFileType === 'csv') {
+                const text = new TextDecoder().decode(fileContent);
+                const lines = text.split('\n').filter(l => l.trim().length > 0);
+                if (lines.length < 2) {
+                    showSnackbar('CSV file is empty or invalid');
+                    return;
+                }
+                const [headerLine, ...dataLines] = lines;
+                const headers = headerLine.split(',').map(h => h.replace(/"/g, '').trim());
+                importedData = dataLines.map(line => {
+                    const values = line.split(',').map(v => v.replace(/"/g, '').trim());
+                    const obj = {};
+                    headers.forEach((h, i) => obj[h] = values[i]);
+                    return obj;
+                });
+            } else {
+                const workbook = XLSX.read(fileContent, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                importedData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                if (!importedData.length) {
+                    showSnackbar('Excel file is empty or invalid');
+                    return;
+                }
+            }
+            if (!importedData.length) {
+                showSnackbar('No data found to import');
+                return;
+            }
+            let importedCount = 0;
+            for (const t of importedData) {
+                if (!t.Quarter || !t.Type || !t.Amount || !t.Date || !t.Year) continue;
+                await addTransaction(
+                    Number(t.Quarter),
+                    t.Type,
+                    Number(t.Amount),
+                    Number(t.Tax || 0),
+                    Number(t['Receipt Amount'] || 0),
+                    t.Description || '',
+                    t.Date,
+                    Number(t.Year)
+                );
+                importedCount++;
+            }
+            if (importedCount > 0) {
+                showSnackbar('Import successful');
+            } else {
+                showSnackbar('No valid rows found to import');
+            }
+        } catch (error) {
+            showSnackbar('Error importing data');
+        }
+    };
+
+
 
     const showSnackbar = (message) => {
         setSnackbarMessage(message);
@@ -320,6 +421,15 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                 >
                     Export Data
                 </Button>
+                <Button
+                    mode="contained"
+                    icon="import"
+                    onPress={handleImportData}
+                    style={[styles.button, { backgroundColor: theme.colors.button }]}
+                    labelStyle={{ color: theme.colors.text }}
+                >
+                    Import Data
+                </Button>
                 <Snackbar
                     visible={snackbarVisible}
                     onDismiss={() => setSnackbarVisible(false)}
@@ -349,6 +459,19 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     }}>
                         <Title style={{ color: theme.colors.text }}>Export Options</Title>
                         <View style={{ marginBottom: 12 }}>
+                            <Text style={{ color: theme.colors.text, marginTop: 8 }}>File Type</Text>
+                            <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                                <Picker
+                                    selectedValue={exportFileType}
+                                    onValueChange={setExportFileType}
+                                    style={{ color: theme.colors.text }}
+                                    dropdownIconColor={theme.colors.button}
+                                >
+                                    {fileTypeOptions.map(opt => (
+                                        <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+                                    ))}
+                                </Picker>
+                            </View>
                             <Text style={{ color: theme.colors.text, marginTop: 8 }}>Year</Text>
                             <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
                                 <Picker
@@ -403,6 +526,49 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     </View>
                 </View>
             </Modal>
+            <Modal
+                visible={importModalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setImportModalVisible(false)}
+            >
+                <View style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.5)'
+                }}>
+                    <View style={{
+                        backgroundColor: theme.colors.surface,
+                        padding: 24,
+                        borderRadius: 16,
+                        width: '80%'
+                    }}>
+                        <Title style={{ color: theme.colors.text }}>Import Options</Title>
+                        <Text style={{ color: theme.colors.text, marginTop: 8 }}>File Type</Text>
+                        <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                            <Picker
+                                selectedValue={importFileType}
+                                onValueChange={setImportFileType}
+                                style={{ color: theme.colors.text }}
+                                dropdownIconColor={theme.colors.button}
+                            >
+                                <Picker.Item label="Excel (.xlsx)" value="xlsx" />
+                                <Picker.Item label="CSV (.csv)" value="csv" />
+                            </Picker>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
+                            <Button onPress={() => setImportModalVisible(false)}>Cancel</Button>
+                            <Button
+                                mode="contained"
+                                onPress={handleImportConfirm}
+                            >
+                                Import
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </LinearGradient>
     );
 };
@@ -410,10 +576,10 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 10,
+        paddingHorizontal: 15,
     },
     sectionTitle: {
-        marginVertical: 8,
+        marginVertical: 5,
     },
     inputHalf: {
         flex: 1,
@@ -427,6 +593,7 @@ const styles = StyleSheet.create({
     },
     button: {
         marginVertical: 8,
+        marginBottom: 32,
     },
     divider: {
         marginVertical: 8,
