@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
-import { TextInput, Button, Divider, Snackbar, Title, Menu, Switch } from 'react-native-paper';
+import { StyleSheet, ScrollView, View, Modal, Text } from 'react-native';
+import { TextInput, Button, Divider, Snackbar, Title, Switch } from 'react-native-paper';
 import * as Sharing from 'expo-sharing';
 import { getSettings, updateSettings, exportData, getCurrency, setCurrency } from '../services/storageService';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Picker } from '@react-native-picker/picker';
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -39,6 +40,12 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [exportModalVisible, setExportModalVisible] = useState(false);
+    const currentYear = new Date().getFullYear();
+    const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
+    const [exportYear, setExportYear] = useState(currentYear);
+    const [exportQuarter, setExportQuarter] = useState('All');
+    const [exportType, setExportType] = useState('Both');
 
     useEffect(() => {
         loadSettings();
@@ -132,8 +139,13 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     };
 
     const handleExportData = async () => {
+        setExportModalVisible(true);
+    };
+
+    const handleExportConfirm = async () => {
+        setExportModalVisible(false);
         try {
-            const fileUri = await exportData();
+            const fileUri = await exportData(exportYear, exportQuarter, exportType);
             await Sharing.shareAsync(fileUri);
         } catch (error) {
             showSnackbar('Error exporting data');
@@ -165,31 +177,40 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                 <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
                 <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Currency</Title>
                 <View>
-                    <Menu
-                        visible={menuVisible}
-                        onDismiss={() => setMenuVisible(false)}
-                        anchor={
-                            <Button
-                                mode="outlined"
-                                onPress={() => setMenuVisible(true)}
-                                style={{ borderColor: theme.colors.button }}
-                                labelStyle={{ color: theme.colors.text }}
-                            >
-                                {selectedCurrency ? `${selectedCurrency.label} (${selectedCurrency.symbol})` : 'Select Currency'}
-                            </Button>
-                        }
+                    <Button
+                        mode="outlined"
+                        onPress={() => setMenuVisible(true)}
+                        style={{ borderColor: theme.colors.button }}
+                        labelStyle={{ color: theme.colors.text }}
                     >
-                        {currencyOptions.map(option => (
-                            <Menu.Item
-                                key={option.label}
-                                onPress={() => {
-                                    setCurrencyState(option.label);
-                                    setMenuVisible(false);
-                                }}
-                                title={`${option.label} (${option.symbol})`}
-                            />
-                        ))}
-                    </Menu>
+                        {selectedCurrency ? `${selectedCurrency.label} (${selectedCurrency.symbol})` : 'Select Currency'}
+                    </Button>
+                    {menuVisible && (
+                        <View style={{
+                            position: 'absolute',
+                            top: 40,
+                            left: 0,
+                            right: 0,
+                            backgroundColor: theme.colors.surface,
+                            borderRadius: 8,
+                            zIndex: 10,
+                            elevation: 10
+                        }}>
+                            {currencyOptions.map(option => (
+                                <Button
+                                    key={option.label}
+                                    onPress={() => {
+                                        setCurrencyState(option.label);
+                                        setMenuVisible(false);
+                                    }}
+                                    style={{ borderColor: theme.colors.button }}
+                                    labelStyle={{ color: theme.colors.text }}
+                                >
+                                    {`${option.label} (${option.symbol})`}
+                                </Button>
+                            ))}
+                        </View>
+                    )}
                 </View>
                 <Button
                     mode="contained"
@@ -308,6 +329,80 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     <Title style={{ color: theme.colors.text, fontSize: 16 }}>{snackbarMessage}</Title>
                 </Snackbar>
             </ScrollView>
+            <Modal
+                visible={exportModalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setExportModalVisible(false)}
+            >
+                <View style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.5)'
+                }}>
+                    <View style={{
+                        backgroundColor: theme.colors.surface,
+                        padding: 24,
+                        borderRadius: 16,
+                        width: '80%'
+                    }}>
+                        <Title style={{ color: theme.colors.text }}>Export Options</Title>
+                        <View style={{ marginBottom: 12 }}>
+                            <Text style={{ color: theme.colors.text, marginTop: 8 }}>Year</Text>
+                            <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                                <Picker
+                                    selectedValue={exportYear}
+                                    onValueChange={setExportYear}
+                                    style={{ color: theme.colors.text }}
+                                    dropdownIconColor={theme.colors.button}
+                                >
+                                    {yearOptions.map(year => (
+                                        <Picker.Item key={year} label={year.toString()} value={year} />
+                                    ))}
+                                </Picker>
+                            </View>
+                            <Text style={{ color: theme.colors.text, marginTop: 8 }}>Quarter</Text>
+                            <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                                <Picker
+                                    selectedValue={exportQuarter}
+                                    onValueChange={setExportQuarter}
+                                    style={{ color: theme.colors.text }}
+                                    dropdownIconColor={theme.colors.button}
+                                >
+                                    <Picker.Item label="All Quarters" value="All" />
+                                    <Picker.Item label="Q1" value="1" />
+                                    <Picker.Item label="Q2" value="2" />
+                                    <Picker.Item label="Q3" value="3" />
+                                    <Picker.Item label="Q4" value="4" />
+                                </Picker>
+                            </View>
+                            <Text style={{ color: theme.colors.text, marginTop: 8 }}>Type</Text>
+                            <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                                <Picker
+                                    selectedValue={exportType}
+                                    onValueChange={setExportType}
+                                    style={{ color: theme.colors.text }}
+                                    dropdownIconColor={theme.colors.button}
+                                >
+                                    <Picker.Item label="Income & Expenditure" value="Both" />
+                                    <Picker.Item label="Income" value="income" />
+                                    <Picker.Item label="Expenditure" value="expenditure" />
+                                </Picker>
+                            </View>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
+                            <Button onPress={() => setExportModalVisible(false)}>Cancel</Button>
+                            <Button
+                                mode="contained"
+                                onPress={handleExportConfirm}
+                            >
+                                Export
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </LinearGradient>
     );
 };
@@ -340,4 +435,3 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreen;
-
