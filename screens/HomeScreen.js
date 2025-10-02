@@ -14,8 +14,7 @@ const currencyOptions = [
     { label: 'INR', symbol: '₹', icon: 'currency-inr' },
 ];
 
-const HomeScreen = ({ navigation, route }) => {
-    const { theme } = route.params;
+const HomeScreen = ({ navigation, theme }) => {
     const currentYear = new Date().getFullYear();
     const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
 

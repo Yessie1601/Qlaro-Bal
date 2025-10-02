@@ -3,9 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const IntroScreen = ({ navigation, route }) => {
-    const { theme } = route.params;
-
+const IntroScreen = ({ navigation, theme }) => {
     return (
         <LinearGradient
             colors={theme.dark

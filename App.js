@@ -58,7 +58,7 @@ export default function App() {
 
     const theme = darkMode ? darkTheme : lightTheme;
 
-    if (introSeen === null) return null; // Wait for AsyncStorage
+    if (introSeen === null) return null;
 
     return (
         <PaperProvider theme={theme}>
@@ -72,28 +72,25 @@ export default function App() {
                         headerTitleStyle: { color: theme.colors.text },
                     }}
                 >
-                    <Stack.Screen
-                        name="Intro"
-                        component={IntroScreen}
-                        options={{ headerShown: false }}
-                        initialParams={{ theme }}
-                    />
-                    <Stack.Screen
-                        name="Home"
-                        component={HomeScreen}
-                        options={{ headerShown: false }}
-                        initialParams={{ theme }}
-                    />
-                    <Stack.Screen
-                        name="Quarter"
-                        component={QuarterScreen}
-                        initialParams={{ theme }}
-                    />
-                    <Stack.Screen
-                        name="Settings"
-                        component={SettingsScreen}
-                        initialParams={{ darkMode, setDarkMode, theme }}
-                    />
+                    <Stack.Screen name="Intro" options={{ headerShown: false }}>
+                        {props => <IntroScreen {...props} theme={theme} />}
+                    </Stack.Screen>
+                    <Stack.Screen name="Home" options={{ headerShown: false }} >
+                        {props => <HomeScreen {...props} theme={theme}/>}
+                    </Stack.Screen>
+                    <Stack.Screen name="Quarter">
+                        {props => <QuarterScreen {...props} theme={theme} />}
+                    </Stack.Screen>
+                    <Stack.Screen name="Settings">
+                        {props => (
+                            <SettingsScreen
+                                {...props}
+                                darkMode={darkMode}
+                                setDarkMode={setDarkMode}
+                                theme={theme}
+                            />
+                        )}
+                    </Stack.Screen>
                 </Stack.Navigator>
             </NavigationContainer>
             <StatusBar style="light" />

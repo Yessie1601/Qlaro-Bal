@@ -34,8 +34,7 @@ const parseQuarterStart = (str) => {
     return { month: '01', day: '01' };
 };
 
-const SettingsScreen = ({ navigation, route }) => {
-    const { theme, darkMode, setDarkMode } = route.params;
+const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [q1Month, setQ1Month] = useState('01');
     const [q1Day, setQ1Day] = useState('01');
     const [q2Month, setQ2Month] = useState('04');

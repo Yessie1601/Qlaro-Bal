@@ -17,8 +17,8 @@ const currencyOptions = [
 
 const PHONE_WIDTH = 600;
 
-const QuarterScreen = ({ navigation, route }) => {
-    const { quarter, startDate, year, theme } = route.params;
+const QuarterScreen = ({ navigation, theme }) => {
+    const { quarter, startDate, year } = route.params;
     const [incomeTransactions, setIncomeTransactions] = useState([]);
     const [expenditureTransactions, setExpenditureTransactions] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
