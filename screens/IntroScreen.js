@@ -3,13 +3,14 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const IntroScreen = ({ navigation, theme }) => {
+const IntroScreen = ({ navigation, route }) => {
+    const { theme } = route.params;
+
     return (
         <LinearGradient
             colors={theme.dark
-                ? ['#68291a', '#a0522d', '#7d4d33']
-                : ['#d2bfa6', '#e7dacb', '#f8f4ef']
-            }
+                ? ['#1e1f22', '#2b2d31', '#232428']
+                : ['#f2f3f5', '#e3e5e8', '#ffffff']}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             style={{ flex: 1 }}
@@ -25,7 +26,7 @@ const IntroScreen = ({ navigation, theme }) => {
                     mode="contained"
                     style={{ backgroundColor: theme.colors.button }}
                     labelStyle={{ color: theme.colors.text }}
-                    onPress={() => navigation.replace('Home')}
+                    onPress={() => navigation.replace('Home', { theme })}
                 >
                     Get Started
                 </Button>
@@ -44,4 +45,3 @@ const styles = StyleSheet.create({
 });
 
 export default IntroScreen;
-

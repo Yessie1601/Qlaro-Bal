@@ -15,12 +15,14 @@ const lightTheme = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,
-        primary: '#68291a',
-        accent: '#937f75',
-        background: '#B2A496',
-        surface: '#937f75',
-        text: '#fff',
-        button: '#937f75',
+        primary: '#5865F2',
+        accent: '#5865F2',
+        background: '#f2f3f5',
+        surface: '#ffffff',
+        text: '#060607',
+        button: '#5865F2',
+        success: '#3ba55d',
+        danger: '#ed4245',
     },
     dark: false,
 };
@@ -29,12 +31,14 @@ const darkTheme = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,
-        primary: '#68291a',
-        accent: '#937f75',
-        background: '#68291a',
-        surface: '#7d4d33',
-        text: '#fff',
-        button: '#7d4d33',
+        primary: '#5865F2',
+        accent: '#5865F2',
+        background: '#2b2d31',
+        surface: '#1e1f22',
+        text: '#ffffff',
+        button: '#5865F2',
+        success: '#3ba55d',
+        danger: '#ed4245',
     },
     dark: true,
 };
@@ -68,25 +72,28 @@ export default function App() {
                         headerTitleStyle: { color: theme.colors.text },
                     }}
                 >
-                    <Stack.Screen name="Intro" options={{ headerShown: false }}>
-                        {props => <IntroScreen {...props} theme={theme} />}
-                    </Stack.Screen>
-                    <Stack.Screen name="Home" options={{ headerShown: false }} >
-                        {props => <HomeScreen {...props} theme={theme}/>}
-                    </Stack.Screen>
-                    <Stack.Screen name="Quarter">
-                        {props => <QuarterScreen {...props} theme={theme} />}
-                    </Stack.Screen>
-                    <Stack.Screen name="Settings">
-                        {props => (
-                            <SettingsScreen
-                                {...props}
-                                darkMode={darkMode}
-                                setDarkMode={setDarkMode}
-                                theme={theme}
-                            />
-                        )}
-                    </Stack.Screen>
+                    <Stack.Screen
+                        name="Intro"
+                        component={IntroScreen}
+                        options={{ headerShown: false }}
+                        initialParams={{ theme }}
+                    />
+                    <Stack.Screen
+                        name="Home"
+                        component={HomeScreen}
+                        options={{ headerShown: false }}
+                        initialParams={{ theme }}
+                    />
+                    <Stack.Screen
+                        name="Quarter"
+                        component={QuarterScreen}
+                        initialParams={{ theme }}
+                    />
+                    <Stack.Screen
+                        name="Settings"
+                        component={SettingsScreen}
+                        initialParams={{ darkMode, setDarkMode, theme }}
+                    />
                 </Stack.Navigator>
             </NavigationContainer>
             <StatusBar style="light" />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, Modal, Text } from 'react-native';
-import { TextInput, Button, Divider, Snackbar, Title, Switch } from 'react-native-paper';
+import { TextInput, Button, Divider, Snackbar, Switch } from 'react-native-paper';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import XLSX from 'xlsx';
@@ -34,7 +34,8 @@ const parseQuarterStart = (str) => {
     return { month: '01', day: '01' };
 };
 
-const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
+const SettingsScreen = ({ navigation, route }) => {
+    const { theme, darkMode, setDarkMode } = route.params;
     const [q1Month, setQ1Month] = useState('01');
     const [q1Day, setQ1Day] = useState('01');
     const [q2Month, setQ2Month] = useState('04');
@@ -51,7 +52,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [importModalVisible, setImportModalVisible] = useState(false);
     const [importFileType, setImportFileType] = useState('xlsx');
     const currentYear = new Date().getFullYear();
-    const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i);
+    const yearOptions = Array.from({length: 8}, (_, i) => currentYear - 5 + i);
     const [exportYear, setExportYear] = useState(currentYear);
     const [exportQuarter, setExportQuarter] = useState('All');
     const [exportType, setExportType] = useState('Both');
@@ -60,33 +61,32 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     useEffect(() => {
         loadSettings();
         loadCurrency();
-        const unsubscribe = navigation.addListener('focus', () => {
+        return navigation.addListener('focus', () => {
             loadSettings();
             loadCurrency();
         });
-        return unsubscribe;
     }, [navigation]);
 
     const loadSettings = async () => {
         try {
             const settings = await getSettings();
             if (settings.q1_start) {
-                const { month, day } = parseQuarterStart(settings.q1_start);
+                const {month, day} = parseQuarterStart(settings.q1_start);
                 setQ1Month(month);
                 setQ1Day(day);
             }
             if (settings.q2_start) {
-                const { month, day } = parseQuarterStart(settings.q2_start);
+                const {month, day} = parseQuarterStart(settings.q2_start);
                 setQ2Month(month);
                 setQ2Day(day);
             }
             if (settings.q3_start) {
-                const { month, day } = parseQuarterStart(settings.q3_start);
+                const {month, day} = parseQuarterStart(settings.q3_start);
                 setQ3Month(month);
                 setQ3Day(day);
             }
             if (settings.q4_start) {
-                const { month, day } = parseQuarterStart(settings.q4_start);
+                const {month, day} = parseQuarterStart(settings.q4_start);
                 setQ4Month(month);
                 setQ4Day(day);
             }
@@ -214,7 +214,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     return obj;
                 });
             } else {
-                const workbook = XLSX.read(fileContent, { type: 'array' });
+                const workbook = XLSX.read(fileContent, {type: 'array'});
                 const sheetName = workbook.SheetNames[0];
                 importedData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
                 if (!importedData.length) {
@@ -252,7 +252,6 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     };
 
 
-
     const showSnackbar = (message) => {
         setSnackbarMessage(message);
         setSnackbarVisible(true);
@@ -263,26 +262,29 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     return (
         <LinearGradient
             colors={theme.dark
-                ? ['#68291a','#7d4d33', '#a0522d' ]
-                : ['#d2bfa6', '#e7dacb', '#f8f4ef']
-            }
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={{ flex: 1 }}
+                ? ['#1e1f22', '#2b2d31', '#232428']
+                : ['#f2f3f5', '#e3e5e8', '#ffffff']}
+            start={{x: 0, y: 0}}
+            end={{x: 0, y: 1}}
+            style={{flex: 1}}
         >
-            <ScrollView style={[styles.container, { backgroundColor: 'transparent' }]}>
+            <ScrollView style={[styles.container, {backgroundColor: 'transparent'}]}>
                 <View style={styles.row}>
-                    <Title style={{flex: 1, color: theme.colors.text}}>Dark Mode</Title>
-                    <Switch value={darkMode} onValueChange={handleToggleDarkMode} color={theme.colors.button} />
+                    <Text style={{flex: 1, color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>Dark Mode</Text>
+                    <Switch value={darkMode} onValueChange={handleToggleDarkMode} color={theme.colors.button}/>
                 </View>
-                <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
-                <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Currency</Title>
+                <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
+                <Text style={[styles.sectionTitle, {
+                    color: theme.colors.text,
+                    fontSize: 20,
+                    fontWeight: 'bold'
+                }]}>Currency</Text>
                 <View>
                     <Button
                         mode="outlined"
                         onPress={() => setMenuVisible(true)}
-                        style={{ borderColor: theme.colors.button }}
-                        labelStyle={{ color: theme.colors.text }}
+                        style={{borderColor: theme.colors.button}}
+                        labelStyle={{color: theme.colors.text}}
                     >
                         {selectedCurrency ? `${selectedCurrency.label} (${selectedCurrency.symbol})` : 'Select Currency'}
                     </Button>
@@ -304,8 +306,8 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                                         setCurrencyState(option.label);
                                         setMenuVisible(false);
                                     }}
-                                    style={{ borderColor: theme.colors.button }}
-                                    labelStyle={{ color: theme.colors.text }}
+                                    style={{borderColor: theme.colors.button}}
+                                    labelStyle={{color: theme.colors.text}}
                                 >
                                     {`${option.label} (${option.symbol})`}
                                 </Button>
@@ -316,108 +318,162 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                 <Button
                     mode="contained"
                     onPress={handleSaveCurrency}
-                    style={[styles.button, { backgroundColor: theme.colors.button }]}
-                    labelStyle={{ color: theme.colors.text }}
+                    style={[styles.button, {backgroundColor: theme.colors.button}]}
+                    labelStyle={{color: theme.colors.text}}
                 >
                     Save Currency
                 </Button>
-                <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
-                <Title style={[styles.sectionTitle, { color: theme.colors.text }]}>Quarter Dates</Title>
+                <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
+                <Text style={[styles.sectionTitle, {color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}]}>Quarter
+                    Dates</Text>
+
                 <View style={styles.row}>
                     <TextInput
+                        mode="outlined"
                         label="Q1 Month (MM)"
                         value={q1Month}
                         onChangeText={setQ1Month}
-                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
+                        textColor={theme.colors.text}
+                        selectionColor={theme.colors.text}
+                        cursorColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.text}
                         keyboardType="number-pad"
                         maxLength={2}
-                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                        outlineColor={theme.colors.button}
+                        activeOutlineColor={theme.colors.button}
                     />
                     <TextInput
+                        mode="outlined"
                         label="Q1 Day (DD)"
                         value={q1Day}
                         onChangeText={setQ1Day}
-                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
+                        textColor={theme.colors.text}
+                        selectionColor={theme.colors.text}
+                        cursorColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.text}
                         keyboardType="number-pad"
                         maxLength={2}
-                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                        outlineColor={theme.colors.button}
+                        activeOutlineColor={theme.colors.button}
                     />
                 </View>
+
                 <View style={styles.row}>
                     <TextInput
+                        mode="outlined"
                         label="Q2 Month (MM)"
                         value={q2Month}
                         onChangeText={setQ2Month}
-                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
+                        textColor={theme.colors.text}
+                        selectionColor={theme.colors.text}
+                        cursorColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.text}
                         keyboardType="number-pad"
                         maxLength={2}
-                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                        outlineColor={theme.colors.button}
+                        activeOutlineColor={theme.colors.button}
                     />
                     <TextInput
+                        mode="outlined"
                         label="Q2 Day (DD)"
                         value={q2Day}
                         onChangeText={setQ2Day}
-                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
+                        textColor={theme.colors.text}
+                        selectionColor={theme.colors.text}
+                        cursorColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.text}
                         keyboardType="number-pad"
                         maxLength={2}
-                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                        outlineColor={theme.colors.button}
+                        activeOutlineColor={theme.colors.button}
                     />
                 </View>
+
                 <View style={styles.row}>
                     <TextInput
+                        mode="outlined"
                         label="Q3 Month (MM)"
                         value={q3Month}
                         onChangeText={setQ3Month}
-                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
+                        textColor={theme.colors.text}
+                        selectionColor={theme.colors.text}
+                        cursorColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.text}
                         keyboardType="number-pad"
                         maxLength={2}
-                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                        outlineColor={theme.colors.button}
+                        activeOutlineColor={theme.colors.button}
                     />
                     <TextInput
+                        mode="outlined"
                         label="Q3 Day (DD)"
                         value={q3Day}
                         onChangeText={setQ3Day}
-                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
+                        textColor={theme.colors.text}
+                        selectionColor={theme.colors.text}
+                        cursorColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.text}
                         keyboardType="number-pad"
                         maxLength={2}
-                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                        outlineColor={theme.colors.button}
+                        activeOutlineColor={theme.colors.button}
                     />
                 </View>
+
                 <View style={styles.row}>
                     <TextInput
+                        mode="outlined"
                         label="Q4 Month (MM)"
                         value={q4Month}
                         onChangeText={setQ4Month}
-                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
+                        textColor={theme.colors.text}
+                        selectionColor={theme.colors.text}
+                        cursorColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.text}
                         keyboardType="number-pad"
                         maxLength={2}
-                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                        outlineColor={theme.colors.button}
+                        activeOutlineColor={theme.colors.button}
                     />
                     <TextInput
+                        mode="outlined"
                         label="Q4 Day (DD)"
                         value={q4Day}
                         onChangeText={setQ4Day}
-                        style={[styles.inputHalf, { backgroundColor: theme.colors.surface }]}
+                        style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
+                        textColor={theme.colors.text}
+                        selectionColor={theme.colors.text}
+                        cursorColor={theme.colors.text}
+                        placeholderTextColor={theme.colors.text}
                         keyboardType="number-pad"
                         maxLength={2}
-                        theme={{ colors: { text: theme.colors.text, background: theme.colors.surface, placeholder: theme.colors.text } }}
+                        outlineColor={theme.colors.button}
+                        activeOutlineColor={theme.colors.button}
                     />
                 </View>
+
                 <Button
                     mode="contained"
                     onPress={handleSaveSettings}
-                    style={[styles.button, { backgroundColor: theme.colors.button }]}
-                    labelStyle={{ color: theme.colors.text }}
+                    style={[styles.button, {backgroundColor: theme.colors.button}]}
+                    labelStyle={{color: theme.colors.text}}
                 >
                     Save Settings
                 </Button>
-                <Divider style={[styles.divider, { backgroundColor: theme.colors.surface }]} />
+                <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
                 <Button
                     mode="contained"
                     icon="export"
                     onPress={handleExportData}
-                    style={[styles.button, { backgroundColor: theme.colors.button }]}
-                    labelStyle={{ color: theme.colors.text }}
+                    style={[styles.button, {backgroundColor: theme.colors.button}]}
+                    labelStyle={{color: theme.colors.text}}
                 >
                     Export Data
                 </Button>
@@ -425,8 +481,8 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     mode="contained"
                     icon="import"
                     onPress={handleImportData}
-                    style={[styles.button, { backgroundColor: theme.colors.button }]}
-                    labelStyle={{ color: theme.colors.text }}
+                    style={[styles.button, {backgroundColor: theme.colors.button}]}
+                    labelStyle={{color: theme.colors.text}}
                 >
                     Import Data
                 </Button>
@@ -434,9 +490,9 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     visible={snackbarVisible}
                     onDismiss={() => setSnackbarVisible(false)}
                     duration={3000}
-                    style={{ backgroundColor: theme.colors.surface }}
+                    style={{backgroundColor: theme.colors.surface}}
                 >
-                    <Title style={{ color: theme.colors.text, fontSize: 16 }}>{snackbarMessage}</Title>
+                    <Text style={{color: theme.colors.text, fontSize: 16, fontWeight: 'bold'}}>{snackbarMessage}</Text>
                 </Snackbar>
             </ScrollView>
             <Modal
@@ -457,64 +513,84 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                         borderRadius: 16,
                         width: '80%'
                     }}>
-                        <Title style={{ color: theme.colors.text }}>Export Options</Title>
-                        <View style={{ marginBottom: 12 }}>
-                            <Text style={{ color: theme.colors.text, marginTop: 8 }}>File Type</Text>
-                            <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                        <Text style={{color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>Export Options</Text>
+                        <View style={{marginBottom: 12}}>
+                            <Text style={{color: theme.colors.text, marginTop: 8}}>File Type</Text>
+                            <View style={{
+                                borderWidth: 1,
+                                borderColor: theme.colors.button,
+                                borderRadius: 8,
+                                marginBottom: 8
+                            }}>
                                 <Picker
                                     selectedValue={exportFileType}
                                     onValueChange={setExportFileType}
-                                    style={{ color: theme.colors.text }}
+                                    style={{color: theme.colors.text}}
                                     dropdownIconColor={theme.colors.button}
                                 >
                                     {fileTypeOptions.map(opt => (
-                                        <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+                                        <Picker.Item key={opt.value} label={opt.label} value={opt.value}/>
                                     ))}
                                 </Picker>
                             </View>
-                            <Text style={{ color: theme.colors.text, marginTop: 8 }}>Year</Text>
-                            <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                            <Text style={{color: theme.colors.text, marginTop: 8}}>Year</Text>
+                            <View style={{
+                                borderWidth: 1,
+                                borderColor: theme.colors.button,
+                                borderRadius: 8,
+                                marginBottom: 8
+                            }}>
                                 <Picker
                                     selectedValue={exportYear}
                                     onValueChange={setExportYear}
-                                    style={{ color: theme.colors.text }}
+                                    style={{color: theme.colors.text}}
                                     dropdownIconColor={theme.colors.button}
                                 >
                                     {yearOptions.map(year => (
-                                        <Picker.Item key={year} label={year.toString()} value={year} />
+                                        <Picker.Item key={year} label={year.toString()} value={year}/>
                                     ))}
                                 </Picker>
                             </View>
-                            <Text style={{ color: theme.colors.text, marginTop: 8 }}>Quarter</Text>
-                            <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                            <Text style={{color: theme.colors.text, marginTop: 8}}>Quarter</Text>
+                            <View style={{
+                                borderWidth: 1,
+                                borderColor: theme.colors.button,
+                                borderRadius: 8,
+                                marginBottom: 8
+                            }}>
                                 <Picker
                                     selectedValue={exportQuarter}
                                     onValueChange={setExportQuarter}
-                                    style={{ color: theme.colors.text }}
+                                    style={{color: theme.colors.text}}
                                     dropdownIconColor={theme.colors.button}
                                 >
-                                    <Picker.Item label="All Quarters" value="All" />
-                                    <Picker.Item label="Q1" value="1" />
-                                    <Picker.Item label="Q2" value="2" />
-                                    <Picker.Item label="Q3" value="3" />
-                                    <Picker.Item label="Q4" value="4" />
+                                    <Picker.Item label="All Quarters" value="All"/>
+                                    <Picker.Item label="Q1" value="1"/>
+                                    <Picker.Item label="Q2" value="2"/>
+                                    <Picker.Item label="Q3" value="3"/>
+                                    <Picker.Item label="Q4" value="4"/>
                                 </Picker>
                             </View>
-                            <Text style={{ color: theme.colors.text, marginTop: 8 }}>Type</Text>
-                            <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                            <Text style={{color: theme.colors.text, marginTop: 8}}>Type</Text>
+                            <View style={{
+                                borderWidth: 1,
+                                borderColor: theme.colors.button,
+                                borderRadius: 8,
+                                marginBottom: 8
+                            }}>
                                 <Picker
                                     selectedValue={exportType}
                                     onValueChange={setExportType}
-                                    style={{ color: theme.colors.text }}
+                                    style={{color: theme.colors.text}}
                                     dropdownIconColor={theme.colors.button}
                                 >
-                                    <Picker.Item label="Income & Expenditure" value="Both" />
-                                    <Picker.Item label="Income" value="income" />
-                                    <Picker.Item label="Expenditure" value="expenditure" />
+                                    <Picker.Item label="Income & Expenditure" value="Both"/>
+                                    <Picker.Item label="Income" value="income"/>
+                                    <Picker.Item label="Expenditure" value="expenditure"/>
                                 </Picker>
                             </View>
                         </View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 16}}>
                             <Button onPress={() => setExportModalVisible(false)}>Cancel</Button>
                             <Button
                                 mode="contained"
@@ -544,20 +620,25 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                         borderRadius: 16,
                         width: '80%'
                     }}>
-                        <Title style={{ color: theme.colors.text }}>Import Options</Title>
-                        <Text style={{ color: theme.colors.text, marginTop: 8 }}>File Type</Text>
-                        <View style={{ borderWidth: 1, borderColor: theme.colors.button, borderRadius: 8, marginBottom: 8 }}>
+                        <Text style={{color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>Import Options</Text>
+                        <Text style={{color: theme.colors.text, marginTop: 8}}>File Type</Text>
+                        <View style={{
+                            borderWidth: 1,
+                            borderColor: theme.colors.button,
+                            borderRadius: 8,
+                            marginBottom: 8
+                        }}>
                             <Picker
                                 selectedValue={importFileType}
                                 onValueChange={setImportFileType}
-                                style={{ color: theme.colors.text }}
+                                style={{color: theme.colors.text}}
                                 dropdownIconColor={theme.colors.button}
                             >
-                                <Picker.Item label="Excel (.xlsx)" value="xlsx" />
-                                <Picker.Item label="CSV (.csv)" value="csv" />
+                                <Picker.Item label="Excel (.xlsx)" value="xlsx"/>
+                                <Picker.Item label="CSV (.csv)" value="csv"/>
                             </Picker>
                         </View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 16}}>
                             <Button onPress={() => setImportModalVisible(false)}>Cancel</Button>
                             <Button
                                 mode="contained"

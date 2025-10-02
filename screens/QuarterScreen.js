@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, TouchableOpacity, useWindowDimensions, View} from 'react-native';
-import {Button, Divider, Modal, Paragraph, Portal} from 'react-native-paper';
+import {Button, Divider, Modal, Portal} from 'react-native-paper';
 import TransactionList from '../components/TransactionList';
 import AddTransactionModal from '../components/AddTransactionModal';
 import {addTransaction, getCurrency, getTransactions} from '../services/storageService';
@@ -17,8 +17,8 @@ const currencyOptions = [
 
 const PHONE_WIDTH = 600;
 
-const QuarterScreen = ({ navigation, route, theme }) => {
-    const { quarter, startDate, year } = route.params;
+const QuarterScreen = ({ navigation, route }) => {
+    const { quarter, startDate, year, theme } = route.params;
     const [incomeTransactions, setIncomeTransactions] = useState([]);
     const [expenditureTransactions, setExpenditureTransactions] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
@@ -95,9 +95,8 @@ const QuarterScreen = ({ navigation, route, theme }) => {
     return (
         <LinearGradient
             colors={theme.dark
-                ? ['#68291a', '#a0522d', '#7d4d33']
-                : ['#d2bfa6', '#e7dacb', '#f8f4ef']
-            }
+                ? ['#1e1f22', '#2b2d31', '#232428']
+                : ['#f2f3f5', '#e3e5e8', '#ffffff']}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             style={{ flex: 1 }}
@@ -119,14 +118,14 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                     >
                         {selectedTransaction && (
                             <>
-                                <Paragraph style={{ color: theme.colors.text }}>Quarter: {selectedTransaction.quarter}</Paragraph>
-                                <Paragraph style={{ color: theme.colors.text }}>Date: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Paragraph>
-                                <Paragraph style={{ color: theme.colors.text }}>Type: {selectedTransaction.type}</Paragraph>
-                                <Paragraph style={{ color: theme.colors.text }}>Amount: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Paragraph>
-                                <Paragraph style={{ color: theme.colors.text }}>Tax: {Math.round(selectedTransaction.tax)}%</Paragraph>
-                                <Paragraph style={{ color: theme.colors.text }}>Tax Value: {currencySymbol}{(selectedTransaction.amount * selectedTransaction.tax / 100).toFixed(2)}</Paragraph>
-                                <Paragraph style={{ color: theme.colors.text }}>Receipt: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Paragraph>
-                                <Paragraph style={{ color: theme.colors.text }}>Description: {selectedTransaction.description}</Paragraph>
+                                <Text style={{ color: theme.colors.text }}>Quarter: {selectedTransaction.quarter}</Text>
+                                <Text style={{ color: theme.colors.text }}>Date: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Text>
+                                <Text style={{ color: theme.colors.text }}>Type: {selectedTransaction.type}</Text>
+                                <Text style={{ color: theme.colors.text }}>Amount: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Text>
+                                <Text style={{ color: theme.colors.text }}>Tax: {Math.round(selectedTransaction.tax)}%</Text>
+                                <Text style={{ color: theme.colors.text }}>Tax Value: {currencySymbol}{(selectedTransaction.amount * selectedTransaction.tax / 100).toFixed(2)}</Text>
+                                <Text style={{ color: theme.colors.text }}>Receipt: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Text>
+                                <Text style={{ color: theme.colors.text }}>Description: {selectedTransaction.description}</Text>
                                 <Button onPress={() => setDetailModalVisible(false)} style={{ marginTop: 16, backgroundColor: theme.colors.button }} labelStyle={{ color: theme.colors.text }}>Close</Button>
                             </>
                         )}
@@ -140,7 +139,7 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                                 {
                                     backgroundColor: activeList === 'income'
                                         ? theme.colors.button
-                                        : theme.dark ? '#68291a' : '#fff',
+                                        : theme.dark ? '#1e1f22' : '#fff',
                                     borderColor: theme.colors.button,
                                     borderWidth: 1,
                                 }
@@ -162,7 +161,7 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                                 {
                                     backgroundColor: activeList === 'expenditure'
                                         ? theme.colors.button
-                                        : theme.dark ? '#68291a' : '#fff',
+                                        : theme.dark ? '#1e1f22' : '#fff',
                                     borderColor: theme.colors.button,
                                     borderWidth: 1,
                                 }

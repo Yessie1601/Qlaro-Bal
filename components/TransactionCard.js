@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, Paragraph } from 'react-native-paper';
+import { Card } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Text } from 'react-native';
 import moment from 'moment';
 
 const TransactionCard = ({
@@ -17,8 +18,8 @@ const TransactionCard = ({
     return (
         <LinearGradient
             colors={theme.dark
-                ? ['#68291a', '#7d4d33']
-                : ['#937f75', '#7d4d33']}
+                ? ['#232428', '#2b2d31']
+                : ['#f2f3f5', '#ffffff']}
             style={{ marginVertical: 4, borderRadius: 8 }}
         >
             <Card
@@ -28,26 +29,26 @@ const TransactionCard = ({
                     elevation: 0,
                     shadowColor: 'transparent',
                     borderWidth: 0.5,
-                    borderColor: '#7d4d33'
+                    borderColor: theme.dark ? '#5865F2' : '#d8dadf'
                 }}
                 onPress={onPress}
             >
                 <Card.Content>
-                    <Paragraph style={{ color: theme?.colors?.text ?? '#000' }}>
+                    <Text style={{ color: theme?.colors?.text ?? '#000' }}>
                         Amount: {currencySymbol}{amount.toFixed(2)}
-                    </Paragraph>
-                    <Paragraph style={{ color: theme?.colors?.text ?? '#000' }}>
+                    </Text>
+                    <Text style={{ color: theme?.colors?.text ?? '#000' }}>
                         Tax: {Math.round(tax)}%
-                    </Paragraph>
-                    <Paragraph style={{ color: theme?.colors?.text ?? '#000' }}>
+                    </Text>
+                    <Text style={{ color: theme?.colors?.text ?? '#000' }}>
                         Tax Value: {currencySymbol}{taxValue.toFixed(2)}
-                    </Paragraph>
-                    <Paragraph style={{ color: theme?.colors?.text ?? '#000' }}>
+                    </Text>
+                    <Text style={{ color: theme?.colors?.text ?? '#000' }}>
                         Receipt: {currencySymbol}{receipt.toFixed(2)}
-                    </Paragraph>
-                    <Paragraph style={{ color: theme?.colors?.text ?? '#000' }}>
+                    </Text>
+                    <Text style={{ color: theme?.colors?.text ?? '#000' }}>
                         Date: {moment(transaction.date).format('MMM D, YYYY')}
-                    </Paragraph>
+                    </Text>
                 </Card.Content>
             </Card>
         </LinearGradient>
@@ -55,5 +56,3 @@ const TransactionCard = ({
 };
 
 export default TransactionCard;
-
-
