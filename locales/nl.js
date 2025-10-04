@@ -1,7 +1,7 @@
 export default {
-    welcome: "Welkom bij Accounting App!",
-    trackByQuarter: "Volg uw inkomsten en uitgaven per kwartaal.",
-    getStarted: "Begin",
+    welcome: "Welkom bij Qlaro!",
+    trackByQuarter: "Volg je inkomsten en uitgaven per kwartaal en zie waar je staat.",
+    getStarted: "Start",
     income: "Inkomen",
     expenditure: "Uitgave",
     balance: "Saldo",

@@ -14,7 +14,7 @@ const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currenc
             colors={theme.dark
                 ? ['#232428', '#2b2d31']
                 : ['#f2f3f5', '#ffffff']}
-            style={{ marginVertical: 10, borderRadius: 50 }}
+            style={{ marginVertical: 20, borderRadius: 50 }}
         >
             <Card
                 style={{

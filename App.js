@@ -1,3 +1,4 @@
+// App.js
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme as NavigationDefaultTheme } from '@react-navigation/native';
@@ -7,8 +8,10 @@ import HomeScreen from './screens/HomeScreen';
 import QuarterScreen from './screens/QuarterScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import IntroScreen from './screens/IntroScreen';
+import SelectOptionsScreen from './screens/SelectOptionsScreen'; // <-- Add this import
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import SplashScreen from './components/SplashScreen';
 
 const Stack = createStackNavigator();
 
@@ -71,8 +74,10 @@ export default function App() {
     const [introSeen, setIntroSeen] = useState(null);
     const [language, setLanguage] = useState('en');
     const [currency, setCurrency] = useState('USD');
+    const [showSplash, setShowSplash] = useState(true);
 
     useEffect(() => {
+        if (showSplash) return;
         (async () => {
             const value = await AsyncStorage.getItem('darkMode');
             setDarkMode(value === 'true');
@@ -83,7 +88,7 @@ export default function App() {
             const curr = await AsyncStorage.getItem('currency');
             if (curr) setCurrency(curr);
         })();
-    }, []);
+    }, [showSplash]);
 
     const handleSetLanguage = async (lang) => {
         setLanguage(lang);
@@ -97,6 +102,10 @@ export default function App() {
 
     const theme = darkMode ? darkTheme : lightTheme;
     const navTheme = darkMode ? navigationDarkTheme : navigationLightTheme;
+
+    if (showSplash) {
+        return <SplashScreen theme={theme} onFinish={() => setShowSplash(false)} />;
+    }
 
     if (introSeen === null) {
         return null;
@@ -119,7 +128,28 @@ export default function App() {
                     }}
                 >
                     <Stack.Screen name="Intro" options={{ headerShown: false }}>
-                        {(props) => <IntroScreen {...props} theme={theme} language={language} />}
+                        {(props) => (
+                            <IntroScreen
+                                {...props}
+                                theme={theme}
+                                language={language}
+                                setLanguage={handleSetLanguage}
+                                currency={currency}
+                                setCurrency={handleSetCurrency}
+                            />
+                        )}
+                    </Stack.Screen>
+                    <Stack.Screen name="SelectOptions">
+                        {(props) => (
+                            <SelectOptionsScreen
+                                {...props}
+                                theme={theme}
+                                language={language}
+                                setLanguage={handleSetLanguage}
+                                currency={currency}
+                                setCurrency={handleSetCurrency}
+                            />
+                        )}
                     </Stack.Screen>
                     <Stack.Screen name="Home" options={{ headerShown: false }}>
                         {(props) => (

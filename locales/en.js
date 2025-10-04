@@ -1,6 +1,6 @@
 export default {
-    welcome: "Welcome to Accounting App!",
-    trackByQuarter: "Track your income and expenditure by quarter.",
+    welcome: "Welcome to Qlaro!",
+    trackByQuarter: "Track your income and expenditure by quarter to see where you stand.",
     getStarted: "Get Started",
     income: "Income",
     expenditure: "Expenditure",

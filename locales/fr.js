@@ -1,6 +1,6 @@
 export default {
-    welcome: "Bienvenue dans l'application de comptabilité !",
-    trackByQuarter: "Suivez vos revenus et dépenses par trimestre.",
+    welcome: "Bienvenue sur Qlaro !",
+    trackByQuarter: "Suivez vos revenus et dépenses par trimestre pour voir où vous en êtes.",
     getStarted: "Commencer",
     income: "Revenu",
     expenditure: "Dépense",

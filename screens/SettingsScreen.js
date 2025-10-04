@@ -46,7 +46,6 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [q4Month, setQ4Month] = useState('10');
     const [q4Day, setQ4Day] = useState('01');
     const [currency, setCurrencyState] = useState(currencyOptions[0].label);
-    const [menuVisible, setMenuVisible] = useState(false);
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [exportModalVisible, setExportModalVisible] = useState(false);
@@ -121,15 +120,6 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
             showSnackbar('Settings saved successfully');
         } catch (error) {
             showSnackbar('Error saving settings');
-        }
-    };
-
-    const handleSaveCurrency = async () => {
-        try {
-            await setCurrency(currency);
-            showSnackbar('Currency saved');
-        } catch (error) {
-            showSnackbar('Error saving currency');
         }
     };
 
@@ -253,13 +243,10 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
         }
     };
 
-
     const showSnackbar = (message) => {
         setSnackbarMessage(message);
         setSnackbarVisible(true);
     };
-
-    const selectedCurrency = currencyOptions.find(c => c.label === currency);
 
     return (
         <LinearGradient
@@ -303,56 +290,35 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     </View>
                 </View>
                 <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
-                <Text style={[styles.sectionTitle, {
-                    color: theme.colors.text,
-                    fontSize: 20,
-                    fontWeight: 'bold'
-                }]}>{t('currency')}</Text>
-                <View>
-                    <Button
-                        mode="outlined"
-                        onPress={() => setMenuVisible(true)}
-                        style={{borderColor: theme.colors.button}}
-                        labelStyle={{color: theme.colors.text}}
-                    >
-                        {selectedCurrency ? `${selectedCurrency.label} (${selectedCurrency.symbol})` : t('selectCurrency')}
-                    </Button>
-                    {menuVisible && (
-                        <View style={{
-                            position: 'absolute',
-                            top: 40,
-                            left: 0,
-                            right: 0,
-                            backgroundColor: theme.colors.surface,
-                            borderRadius: 8,
-                            zIndex: 10,
-                            elevation: 10
-                        }}>
+                <View style={styles.row}>
+                    <Text style={{flex: 1, color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>
+                        {t('currency')}
+                    </Text>
+                    <View style={{
+                        borderWidth: 1,
+                        borderColor: theme.colors.button,
+                        borderRadius: 8,
+                        width: 150,
+                        backgroundColor: theme.colors.surface
+                    }}>
+                        <Picker
+                            selectedValue={currency}
+                            onValueChange={async value => {
+                                setCurrencyState(value);
+                                await setCurrency(value);
+                                showSnackbar('Currency saved');
+                            }}
+                            style={{color: theme.colors.text}}
+                            dropdownIconColor={theme.colors.button}
+                        >
                             {currencyOptions.map(option => (
-                                <Button
-                                    key={option.label}
-                                    onPress={() => {
-                                        setCurrencyState(option.label);
-                                        setMenuVisible(false);
-                                    }}
-                                    style={{borderColor: theme.colors.button}}
-                                    labelStyle={{color: theme.colors.text}}
-                                >
-                                    {`${option.label} (${option.symbol})`}
-                                </Button>
+                                <Picker.Item key={option.label} label={`${option.label} (${option.symbol})`} value={option.label}/>
                             ))}
-                        </View>
-                    )}
+                        </Picker>
+                    </View>
                 </View>
-                <Button
-                    mode="contained"
-                    onPress={handleSaveCurrency}
-                    style={[styles.button, {backgroundColor: theme.colors.button}]}
-                    labelStyle={{color: theme.colors.text}}
-                >
-                    {t('saveCurrency')}
-                </Button>
                 <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
+
                 <Text style={[styles.sectionTitle, {color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}]}>
                     {t('quarterDates')}
                 </Text>
