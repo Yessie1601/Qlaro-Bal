@@ -69,6 +69,8 @@ const navigationDarkTheme = {
 export default function App() {
     const [darkMode, setDarkMode] = useState(false);
     const [introSeen, setIntroSeen] = useState(null);
+    const [language, setLanguage] = useState('en');
+    const [currency, setCurrency] = useState('USD');
 
     useEffect(() => {
         (async () => {
@@ -76,8 +78,22 @@ export default function App() {
             setDarkMode(value === 'true');
             const intro = await AsyncStorage.getItem('introSeen');
             setIntroSeen(intro === 'true');
+            const lang = await AsyncStorage.getItem('language');
+            if (lang) setLanguage(lang);
+            const curr = await AsyncStorage.getItem('currency');
+            if (curr) setCurrency(curr);
         })();
     }, []);
+
+    const handleSetLanguage = async (lang) => {
+        setLanguage(lang);
+        await AsyncStorage.setItem('language', lang);
+    };
+
+    const handleSetCurrency = async (curr) => {
+        setCurrency(curr);
+        await AsyncStorage.setItem('currency', curr);
+    };
 
     const theme = darkMode ? darkTheme : lightTheme;
     const navTheme = darkMode ? navigationDarkTheme : navigationLightTheme;
@@ -103,13 +119,29 @@ export default function App() {
                     }}
                 >
                     <Stack.Screen name="Intro" options={{ headerShown: false }}>
-                        {(props) => <IntroScreen {...props} theme={theme} />}
+                        {(props) => <IntroScreen {...props} theme={theme} language={language} />}
                     </Stack.Screen>
                     <Stack.Screen name="Home" options={{ headerShown: false }}>
-                        {(props) => <HomeScreen {...props} theme={theme} />}
+                        {(props) => (
+                            <HomeScreen
+                                {...props}
+                                theme={theme}
+                                language={language}
+                                currency={currency}
+                                setLanguage={handleSetLanguage}
+                                setCurrency={handleSetCurrency}
+                            />
+                        )}
                     </Stack.Screen>
                     <Stack.Screen name="Quarter">
-                        {(props) => <QuarterScreen {...props} theme={theme} />}
+                        {(props) => (
+                            <QuarterScreen
+                                {...props}
+                                theme={theme}
+                                language={language}
+                                currency={currency}
+                            />
+                        )}
                     </Stack.Screen>
                     <Stack.Screen name="Settings">
                         {(props) => (
@@ -118,6 +150,10 @@ export default function App() {
                                 darkMode={darkMode}
                                 setDarkMode={setDarkMode}
                                 theme={theme}
+                                language={language}
+                                setLanguage={handleSetLanguage}
+                                currency={currency}
+                                setCurrency={handleSetCurrency}
                             />
                         )}
                     </Stack.Screen>

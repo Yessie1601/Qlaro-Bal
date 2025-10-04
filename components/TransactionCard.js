@@ -3,6 +3,7 @@ import { Card } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text } from 'react-native';
 import moment from 'moment';
+import { t } from '../i18n';
 
 const TransactionCard = ({
                              transaction,
@@ -35,19 +36,19 @@ const TransactionCard = ({
             >
                 <Card.Content>
                     <Text style={{ color: theme?.colors?.text ?? '#000' }}>
-                        Amount: {currencySymbol}{amount.toFixed(2)}
+                        {t('amount')}: {currencySymbol}{amount.toFixed(2)}
                     </Text>
                     <Text style={{ color: theme?.colors?.text ?? '#000' }}>
-                        Tax: {Math.round(tax)}%
+                        {t('tax')}: {Math.round(tax)}%
                     </Text>
                     <Text style={{ color: theme?.colors?.text ?? '#000' }}>
-                        Tax Value: {currencySymbol}{taxValue.toFixed(2)}
+                        {t('taxValue')}: {currencySymbol}{taxValue.toFixed(2)}
                     </Text>
                     <Text style={{ color: theme?.colors?.text ?? '#000' }}>
-                        Receipt: {currencySymbol}{receipt.toFixed(2)}
+                        {t('receipt')}: {currencySymbol}{receipt.toFixed(2)}
                     </Text>
                     <Text style={{ color: theme?.colors?.text ?? '#000' }}>
-                        Date: {moment(transaction.date).format('MMM D, YYYY')}
+                        {t('date')}: {moment(transaction.date).format('MMM D, YYYY')}
                     </Text>
                 </Card.Content>
             </Card>

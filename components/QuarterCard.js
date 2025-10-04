@@ -3,6 +3,7 @@ import { StyleSheet, View, Text } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import moment from 'moment';
+import { t } from '../i18n';
 
 const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currencySymbol = '$', theme }) => {
     const formattedDate = moment(startDate).format('MMM D');
@@ -27,19 +28,21 @@ const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currenc
                 onPress={onPress}
             >
                 <Card.Content>
-                    <Text style={{ color: theme.colors.text, padding: 2, fontSize: 20, fontWeight: 'bold' }}>Q{quarter}</Text>
+                    <Text style={{ color: theme.colors.text, padding: 2, fontSize: 20, fontWeight: 'bold' }}>
+                        Q{quarter}
+                    </Text>
                     <Text style={{ color: theme.colors.text, padding: 2 }}>
-                        Starting: {formattedDate}
+                        {t('starting')}: {formattedDate}
                     </Text>
 
                     <View style={styles.row}>
                         <Text style={{ color: theme.colors.text, padding: 2 }}>
-                            Income: {currencySymbol}{income.toFixed(2)}
+                            {t('income')}: {currencySymbol}{income.toFixed(2)}
                         </Text>
                     </View>
                     <View style={styles.row}>
                         <Text style={{ color: theme.colors.text, padding: 2 }}>
-                            Expenditure: {currencySymbol}{expenditure.toFixed(2)}
+                            {t('expenditure')}: {currencySymbol}{expenditure.toFixed(2)}
                         </Text>
                     </View>
                     <View style={styles.row}>
@@ -51,7 +54,7 @@ const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currenc
                                 padding: 2,
                             }}
                         >
-                            Balance: {currencySymbol}{balance.toFixed(2)}
+                            {t('balance')}: {currencySymbol}{balance.toFixed(2)}
                         </Text>
                     </View>
                 </Card.Content>
@@ -62,7 +65,7 @@ const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currenc
                         onPress={onPress}
                         labelStyle={{ color: theme.colors.accent }}
                     >
-                        View Details
+                        {t('viewDetails')}
                     </Button>
                 </Card.Actions>
             </Card>
@@ -82,3 +85,4 @@ const styles = StyleSheet.create({
 });
 
 export default QuarterCard;
+

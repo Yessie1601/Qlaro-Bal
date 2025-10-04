@@ -9,6 +9,8 @@ import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Picker } from '@react-native-picker/picker';
+import { supportedLanguages, setLanguage, getCurrentLanguage, t  } from '../i18n';
+
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -56,6 +58,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [exportQuarter, setExportQuarter] = useState('All');
     const [exportType, setExportType] = useState('Both');
     const [exportFileType, setExportFileType] = useState('xlsx');
+    const [selectedLanguage, setSelectedLanguage] = useState(getCurrentLanguage());
 
     useEffect(() => {
         loadSettings();
@@ -269,15 +272,42 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
         >
             <ScrollView style={[styles.container, {backgroundColor: 'transparent'}]}>
                 <View style={styles.row}>
-                    <Text style={{flex: 1, color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>Dark Mode</Text>
+                    <Text style={{flex: 1, color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>{t('darkMode')}</Text>
                     <Switch value={darkMode} onValueChange={handleToggleDarkMode} color={theme.colors.button}/>
+                </View>
+                <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
+                <View style={styles.row}>
+                    <Text style={{flex: 1, color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>
+                        {t('language')}
+                    </Text>
+                    <View style={{
+                        borderWidth: 1,
+                        borderColor: theme.colors.button,
+                        borderRadius: 8,
+                        width: 150,
+                        backgroundColor: theme.colors.surface
+                    }}>
+                        <Picker
+                            selectedValue={selectedLanguage}
+                            onValueChange={lang => {
+                                setSelectedLanguage(lang);
+                                setLanguage(lang);
+                            }}
+                            style={{color: theme.colors.text}}
+                            dropdownIconColor={theme.colors.button}
+                        >
+                            {supportedLanguages.map(lang => (
+                                <Picker.Item key={lang.value} label={lang.label} value={lang.value}/>
+                            ))}
+                        </Picker>
+                    </View>
                 </View>
                 <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
                 <Text style={[styles.sectionTitle, {
                     color: theme.colors.text,
                     fontSize: 20,
                     fontWeight: 'bold'
-                }]}>Currency</Text>
+                }]}>{t('currency')}</Text>
                 <View>
                     <Button
                         mode="outlined"
@@ -285,7 +315,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                         style={{borderColor: theme.colors.button}}
                         labelStyle={{color: theme.colors.text}}
                     >
-                        {selectedCurrency ? `${selectedCurrency.label} (${selectedCurrency.symbol})` : 'Select Currency'}
+                        {selectedCurrency ? `${selectedCurrency.label} (${selectedCurrency.symbol})` : t('selectCurrency')}
                     </Button>
                     {menuVisible && (
                         <View style={{
@@ -320,16 +350,17 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     style={[styles.button, {backgroundColor: theme.colors.button}]}
                     labelStyle={{color: theme.colors.text}}
                 >
-                    Save Currency
+                    {t('saveCurrency')}
                 </Button>
                 <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
-                <Text style={[styles.sectionTitle, {color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}]}>Quarter
-                    Dates</Text>
+                <Text style={[styles.sectionTitle, {color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}]}>
+                    {t('quarterDates')}
+                </Text>
 
                 <View style={styles.row}>
                     <TextInput
                         mode="outlined"
-                        label="Q1 Month (MM)"
+                        label={t('q1Month')}
                         value={q1Month}
                         onChangeText={setQ1Month}
                         style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
@@ -344,7 +375,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     />
                     <TextInput
                         mode="outlined"
-                        label="Q1 Day (DD)"
+                        label={t('q1Day')}
                         value={q1Day}
                         onChangeText={setQ1Day}
                         style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
@@ -362,7 +393,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                 <View style={styles.row}>
                     <TextInput
                         mode="outlined"
-                        label="Q2 Month (MM)"
+                        label={t('q2Month')}
                         value={q2Month}
                         onChangeText={setQ2Month}
                         style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
@@ -377,7 +408,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     />
                     <TextInput
                         mode="outlined"
-                        label="Q2 Day (DD)"
+                        label={t('q2Day')}
                         value={q2Day}
                         onChangeText={setQ2Day}
                         style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
@@ -395,7 +426,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                 <View style={styles.row}>
                     <TextInput
                         mode="outlined"
-                        label="Q3 Month (MM)"
+                        label={t('q3Month')}
                         value={q3Month}
                         onChangeText={setQ3Month}
                         style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
@@ -410,7 +441,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     />
                     <TextInput
                         mode="outlined"
-                        label="Q3 Day (DD)"
+                        label={t('q3Day')}
                         value={q3Day}
                         onChangeText={setQ3Day}
                         style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
@@ -428,7 +459,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                 <View style={styles.row}>
                     <TextInput
                         mode="outlined"
-                        label="Q4 Month (MM)"
+                        label={t('q4Month')}
                         value={q4Month}
                         onChangeText={setQ4Month}
                         style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
@@ -443,7 +474,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     />
                     <TextInput
                         mode="outlined"
-                        label="Q4 Day (DD)"
+                        label={t('q4Day')}
                         value={q4Day}
                         onChangeText={setQ4Day}
                         style={[styles.inputHalf, {backgroundColor: theme.colors.surface}]}
@@ -464,7 +495,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     style={[styles.button, {backgroundColor: theme.colors.button}]}
                     labelStyle={{color: theme.colors.text}}
                 >
-                    Save Settings
+                    {t('saveSettings')}
                 </Button>
                 <Divider style={[styles.divider, {backgroundColor: theme.colors.surface}]}/>
                 <Button
@@ -474,7 +505,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     style={[styles.button, {backgroundColor: theme.colors.button}]}
                     labelStyle={{color: theme.colors.text}}
                 >
-                    Export Data
+                    {t('exportData')}
                 </Button>
                 <Button
                     mode="contained"
@@ -483,7 +514,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     style={[styles.button, {backgroundColor: theme.colors.button}]}
                     labelStyle={{color: theme.colors.text}}
                 >
-                    Import Data
+                    {t('importData')}
                 </Button>
                 <Snackbar
                     visible={snackbarVisible}
@@ -512,9 +543,9 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                         borderRadius: 16,
                         width: '80%'
                     }}>
-                        <Text style={{color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>Export Options</Text>
+                        <Text style={{color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>{t('exportOptions')}</Text>
                         <View style={{marginBottom: 12}}>
-                            <Text style={{color: theme.colors.text, marginTop: 8}}>File Type</Text>
+                            <Text style={{color: theme.colors.text, marginTop: 8}}>{t('fileType')}</Text>
                             <View style={{
                                 borderWidth: 1,
                                 borderColor: theme.colors.button,
@@ -532,7 +563,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                                     ))}
                                 </Picker>
                             </View>
-                            <Text style={{color: theme.colors.text, marginTop: 8}}>Year</Text>
+                            <Text style={{color: theme.colors.text, marginTop: 8}}>{t('year')}</Text>
                             <View style={{
                                 borderWidth: 1,
                                 borderColor: theme.colors.button,
@@ -550,7 +581,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                                     ))}
                                 </Picker>
                             </View>
-                            <Text style={{color: theme.colors.text, marginTop: 8}}>Quarter</Text>
+                            <Text style={{color: theme.colors.text, marginTop: 8}}>{t('quarter')}</Text>
                             <View style={{
                                 borderWidth: 1,
                                 borderColor: theme.colors.button,
@@ -563,14 +594,14 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                                     style={{color: theme.colors.text}}
                                     dropdownIconColor={theme.colors.button}
                                 >
-                                    <Picker.Item label="All Quarters" value="All"/>
+                                    <Picker.Item label={t('allQuarters')} value="All"/>
                                     <Picker.Item label="Q1" value="1"/>
                                     <Picker.Item label="Q2" value="2"/>
                                     <Picker.Item label="Q3" value="3"/>
                                     <Picker.Item label="Q4" value="4"/>
                                 </Picker>
                             </View>
-                            <Text style={{color: theme.colors.text, marginTop: 8}}>Type</Text>
+                            <Text style={{color: theme.colors.text, marginTop: 8}}>{t('type')}</Text>
                             <View style={{
                                 borderWidth: 1,
                                 borderColor: theme.colors.button,
@@ -583,19 +614,19 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                                     style={{color: theme.colors.text}}
                                     dropdownIconColor={theme.colors.button}
                                 >
-                                    <Picker.Item label="Income & Expenditure" value="Both"/>
-                                    <Picker.Item label="Income" value="income"/>
-                                    <Picker.Item label="Expenditure" value="expenditure"/>
+                                    <Picker.Item label={`${t('income')} & ${t('expenditure')}`} value="Both"/>
+                                    <Picker.Item label={t('income')} value="income"/>
+                                    <Picker.Item label={t('expenditure')} value="expenditure"/>
                                 </Picker>
                             </View>
                         </View>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 16}}>
-                            <Button onPress={() => setExportModalVisible(false)}>Cancel</Button>
+                            <Button onPress={() => setExportModalVisible(false)}>{t('cancel')}</Button>
                             <Button
                                 mode="contained"
                                 onPress={handleExportConfirm}
                             >
-                                Export
+                                {t('export')}
                             </Button>
                         </View>
                     </View>
@@ -619,8 +650,8 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                         borderRadius: 16,
                         width: '80%'
                     }}>
-                        <Text style={{color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>Import Options</Text>
-                        <Text style={{color: theme.colors.text, marginTop: 8}}>File Type</Text>
+                        <Text style={{color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>{t('importOptions')}</Text>
+                        <Text style={{color: theme.colors.text, marginTop: 8}}>{t('fileType')}</Text>
                         <View style={{
                             borderWidth: 1,
                             borderColor: theme.colors.button,
@@ -633,17 +664,17 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                                 style={{color: theme.colors.text}}
                                 dropdownIconColor={theme.colors.button}
                             >
-                                <Picker.Item label="Excel (.xlsx)" value="xlsx"/>
-                                <Picker.Item label="CSV (.csv)" value="csv"/>
+                                <Picker.Item label={fileTypeOptions[0].label} value="xlsx"/>
+                                <Picker.Item label={fileTypeOptions[1].label} value="csv"/>
                             </Picker>
                         </View>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 16}}>
-                            <Button onPress={() => setImportModalVisible(false)}>Cancel</Button>
+                            <Button onPress={() => setImportModalVisible(false)}>{t('cancel')}</Button>
                             <Button
                                 mode="contained"
                                 onPress={handleImportConfirm}
                             >
-                                Import
+                                {t('import')}
                             </Button>
                         </View>
                     </View>

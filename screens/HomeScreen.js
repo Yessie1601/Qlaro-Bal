@@ -5,6 +5,7 @@ import { Button } from 'react-native-paper';
 import QuarterCard from '../components/QuarterCard';
 import { getCurrency, getSettings, getTotals, initDatabase } from '../services/storageService';
 import { LinearGradient } from 'expo-linear-gradient';
+import {t} from '../i18n';
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -131,10 +132,10 @@ const HomeScreen = ({ navigation, theme }) => {
                 >
                     <View style={{ alignItems: 'center', width: '100%' }}>
                         <Text style={{ color: theme.colors.text, fontSize: 20, padding: 2 }}>
-                            Income: {currencySymbol}{yearlyTotals.income.toFixed(2)}
+                            {t('income')}: {currencySymbol}{yearlyTotals.income.toFixed(2)}
                         </Text>
                         <Text style={{ color: theme.colors.text, fontSize: 20, padding: 2 }}>
-                            Expenditure: {currencySymbol}{yearlyTotals.expenditure.toFixed(2)}
+                            {t('expenditure')}: {currencySymbol}{yearlyTotals.expenditure.toFixed(2)}
                         </Text>
                         <Text
                             style={{
@@ -144,7 +145,7 @@ const HomeScreen = ({ navigation, theme }) => {
                                 padding: 2,
                             }}
                         >
-                            Balance: {currencySymbol}{yearlyTotals.balance.toFixed(2)}
+                            {t('balance')}: {currencySymbol}{yearlyTotals.balance.toFixed(2)}
                         </Text>
 
                         <View style={styles.yearSelectorContainer}>
@@ -260,7 +261,7 @@ const HomeScreen = ({ navigation, theme }) => {
                             style={[styles.settingsButton, { backgroundColor: theme.colors.button }]}
                             labelStyle={{ color: '#fff' }}
                         >
-                            Settings
+                            {t('settings')}
                         </Button>
                     </View>
                 </ScrollView>

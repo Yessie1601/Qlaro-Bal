@@ -15,10 +15,10 @@ const IntroScreen = ({ navigation, theme }) => {
         >
             <View style={[styles.container, { backgroundColor: 'transparent' }]}>
                 <Text style={{ color: theme.colors.text, fontSize: 28, fontWeight: 'bold', marginBottom: 24 }}>
-                    Welcome to Accounting App!
+                    Welcome to Qlaro!
                 </Text>
                 <Text style={{ color: theme.colors.text, fontSize: 18, marginBottom: 32 }}>
-                    Track your income and expenditure by quarter.
+                    Track your income and expenditure by quarter to see where you stand.
                 </Text>
                 <Button
                     mode="contained"

@@ -1,7 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
-import {Button, HelperText, Modal, Portal, TextInput, Title} from 'react-native-paper';
+import {Button, HelperText, Modal, Portal, TextInput} from 'react-native-paper';
 import moment from 'moment';
+import {t} from '../i18n';
+import { Text } from 'react-native-paper';
 
 const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) => {
     const today = moment();
@@ -35,14 +37,14 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
 
     const validateForm = () => {
         const newErrors = {};
-        if (!description.trim()) newErrors.description = 'Description is required';
-        if (!amount || isNaN(parseFloat(amount))) newErrors.amount = 'Valid amount is required';
-        if (!tax || isNaN(parseFloat(tax))) newErrors.tax = 'Valid tax amount is required';
-        if (!receiptAmount || isNaN(parseFloat(receiptAmount))) newErrors.receiptAmount = 'Valid receipt amount is required';
-        if (!month || !/^(0[1-9]|1[0-2])$/.test(month)) newErrors.month = 'Month must be 01-12';
-        if (!day || !/^(0[1-9]|[12][0-9]|3[01])$/.test(day)) newErrors.day = 'Day must be 01-31';
+        if (!description.trim()) newErrors.description = t('description') + ' ' + t('isRequired');
+        if (!amount || isNaN(parseFloat(amount))) newErrors.amount = t('amount') + ' ' + t('isRequired');
+        if (!tax || isNaN(parseFloat(tax))) newErrors.tax = t('tax') + ' ' + t('isRequired');
+        if (!receiptAmount || isNaN(parseFloat(receiptAmount))) newErrors.receiptAmount = t('receiptAmount') + ' ' + t('isRequired');
+        if (!month || !/^(0[1-9]|1[0-2])$/.test(month)) newErrors.month = t('month') + ' 01-12';
+        if (!day || !/^(0[1-9]|[12][0-9]|3[01])$/.test(day)) newErrors.day = t('day') + ' 01-31';
         const dateStr = `${year}-${month}-${day}`;
-        if (!moment(dateStr, 'YYYY-MM-DD', true).isValid()) newErrors.date = 'Invalid date';
+        if (!moment(dateStr, 'YYYY-MM-DD', true).isValid()) newErrors.date = t('date') + ' ' + t('isInvalid');
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -83,11 +85,13 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
         <Portal>
             <Modal visible={visible} onDismiss={onCancel} contentContainerStyle={styles.container}>
                 <ScrollView>
-                    <Title style={styles.title}>Add {type === 'income' ? 'Income' : 'Expenditure'}</Title>
+                    <Text variant="titleLarge" style={styles.title}>
+                        {type === 'income' ? t('addIncome') : t('addExpenditure')}
+                    </Text>
 
                     <View style={styles.dateRow}>
                         <TextInput
-                            label="Month (MM)"
+                            label={t('month')}
                             value={month}
                             onChangeText={setMonth}
                             keyboardType="number-pad"
@@ -96,7 +100,7 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                             error={!!errors.month}
                         />
                         <TextInput
-                            label="Day (DD)"
+                            label={t('day')}
                             value={day}
                             onChangeText={setDay}
                             keyboardType="number-pad"
@@ -105,7 +109,7 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                             error={!!errors.day}
                         />
                         <View style={styles.yearBox}>
-                            <Title style={styles.yearText}>{year}</Title>
+                            <Text style={styles.yearText}>{year}</Text>
                         </View>
                     </View>
                     {(errors.month || errors.day || errors.date) && (
@@ -115,7 +119,7 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                     )}
 
                     <TextInput
-                        label="Amount"
+                        label={t('amount')}
                         value={amount}
                         onChangeText={setAmount}
                         keyboardType="decimal-pad"
@@ -125,7 +129,7 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                     {errors.amount && <HelperText type="error">{errors.amount}</HelperText>}
 
                     <TextInput
-                        label="Tax (%)"
+                        label={t('tax') + ' (%)'}
                         value={tax}
                         onChangeText={setTax}
                         keyboardType="decimal-pad"
@@ -135,7 +139,7 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                     {errors.tax && <HelperText type="error">{errors.tax}</HelperText>}
 
                     <TextInput
-                        label="Receipt Amount"
+                        label={t('receiptAmount')}
                         value={receiptAmount}
                         onChangeText={setReceiptAmount}
                         keyboardType="decimal-pad"
@@ -145,7 +149,7 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                     {errors.receiptAmount && <HelperText type="error">{errors.receiptAmount}</HelperText>}
 
                     <TextInput
-                        label="Description"
+                        label={t('description')}
                         value={description}
                         onChangeText={setDescription}
                         style={styles.input}
@@ -154,8 +158,8 @@ const AddTransactionModal = ({visible, onDismiss, onSave, type, quarter, year}) 
                     {errors.description && <HelperText type="error">{errors.description}</HelperText>}
 
                     <View style={styles.buttonContainer}>
-                        <Button onPress={onCancel} style={styles.button}>Cancel</Button>
-                        <Button mode="contained" onPress={handleSave} style={styles.button}>Save</Button>
+                        <Button onPress={onCancel} style={styles.button}>{t('cancel')}</Button>
+                        <Button mode="contained" onPress={handleSave} style={styles.button}>{t('save')}</Button>
                     </View>
                 </ScrollView>
             </Modal>

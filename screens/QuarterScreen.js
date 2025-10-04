@@ -3,9 +3,10 @@ import {StyleSheet, Text, TouchableOpacity, useWindowDimensions, View} from 'rea
 import {Button, Divider, Modal, Portal} from 'react-native-paper';
 import TransactionList from '../components/TransactionList';
 import AddTransactionModal from '../components/AddTransactionModal';
-import {addTransaction, getCurrency, getTransactions} from '../services/storageService';
+import {addTransaction, getCurrency, getTransactions, deleteTransaction} from '../services/storageService';
 import moment from 'moment';
 import { LinearGradient } from 'expo-linear-gradient';
+import {t} from '../i18n';
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -27,6 +28,7 @@ const QuarterScreen = ({ navigation, route, theme }) => {
     const [activeList, setActiveList] = useState('income');
     const [detailModalVisible, setDetailModalVisible] = useState(false);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const { width } = useWindowDimensions();
     const isPhone = width < PHONE_WIDTH;
 
@@ -88,6 +90,23 @@ const QuarterScreen = ({ navigation, route, theme }) => {
         setDetailModalVisible(true);
     };
 
+    const handleDeleteTransaction = async () => {
+        if (selectedTransaction) {
+            try {
+                await deleteTransaction(
+                    selectedTransaction.quarter,
+                    selectedTransaction.type,
+                    selectedTransaction.date
+                );
+                setDetailModalVisible(false);
+                setConfirmDeleteVisible(false);
+                loadTransactions();
+            } catch (error) {
+                console.error('Error deleting transaction:', error);
+            }
+        }
+    };
+
     const currencyObj = currencyOptions.find(c => c.label === currency) || currencyOptions[0];
     const currencySymbol = currencyObj.symbol;
     const currencyIcon = currencyObj.icon;
@@ -118,17 +137,47 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                     >
                         {selectedTransaction && (
                             <>
-                                <Text style={{ color: theme.colors.text }}>Quarter: {selectedTransaction.quarter}</Text>
-                                <Text style={{ color: theme.colors.text }}>Date: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Text>
-                                <Text style={{ color: theme.colors.text }}>Type: {selectedTransaction.type}</Text>
-                                <Text style={{ color: theme.colors.text }}>Amount: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Text>
-                                <Text style={{ color: theme.colors.text }}>Tax: {Math.round(selectedTransaction.tax)}%</Text>
-                                <Text style={{ color: theme.colors.text }}>Tax Value: {currencySymbol}{(selectedTransaction.amount * selectedTransaction.tax / 100).toFixed(2)}</Text>
-                                <Text style={{ color: theme.colors.text }}>Receipt: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Text>
-                                <Text style={{ color: theme.colors.text }}>Description: {selectedTransaction.description}</Text>
-                                <Button onPress={() => setDetailModalVisible(false)} style={{ marginTop: 16, backgroundColor: theme.colors.button }} labelStyle={{ color: theme.colors.text }}>Close</Button>
+                                <Text style={{ color: theme.colors.text }}>{t('quarter')}: {selectedTransaction.quarter}</Text>
+                                <Text style={{ color: theme.colors.text }}>{t('date')}: {moment(selectedTransaction.date).format('MMM D, YYYY')}</Text>
+                                <Text style={{ color: theme.colors.text }}>{t('type')}: {t(selectedTransaction.type)}</Text>
+                                <Text style={{ color: theme.colors.text }}>{t('amount')}: {currencySymbol}{selectedTransaction.amount.toFixed(2)}</Text>
+                                <Text style={{ color: theme.colors.text }}>{t('tax')}: {Math.round(selectedTransaction.tax)}%</Text>
+                                <Text style={{ color: theme.colors.text }}>{t('taxValue')}: {currencySymbol}{(selectedTransaction.amount * selectedTransaction.tax / 100).toFixed(2)}</Text>
+                                <Text style={{ color: theme.colors.text }}>{t('receipt')}: {currencySymbol}{selectedTransaction.receipt_amount.toFixed(2)}</Text>
+                                <Text style={{ color: theme.colors.text }}>{t('description')}: {selectedTransaction.description}</Text>
+                                <Button onPress={() => setDetailModalVisible(false)} style={{ marginTop: 16, backgroundColor: theme.colors.button }} labelStyle={{ color: theme.colors.text }}>{t('close')}</Button>
+                                <Button
+                                    onPress={() => setConfirmDeleteVisible(true)}
+                                    style={{ marginTop: 8, backgroundColor: theme.colors.danger }}
+                                    labelStyle={{ color: theme.colors.text }}
+                                >
+                                    {t('delete')}
+                                </Button>
                             </>
                         )}
+                    </Modal>
+                    <Modal
+                        visible={confirmDeleteVisible}
+                        onDismiss={() => setConfirmDeleteVisible(false)}
+                        contentContainerStyle={{ margin: 24, backgroundColor: theme.colors.surface, padding: 24, borderRadius: 8 }}
+                    >
+                        <Text style={{ color: theme.colors.text, marginBottom: 16 }}>
+                            {t('areYouSureDelete')}
+                        </Text>
+                        <Button
+                            onPress={handleDeleteTransaction}
+                            style={{ backgroundColor: theme.colors.danger, marginBottom: 8 }}
+                            labelStyle={{ color: theme.colors.text }}
+                        >
+                            {t('confirm')}
+                        </Button>
+                        <Button
+                            onPress={() => setConfirmDeleteVisible(false)}
+                            style={{ backgroundColor: theme.colors.button }}
+                            labelStyle={{ color: theme.colors.text }}
+                        >
+                            {t('cancel')}
+                        </Button>
                     </Modal>
                 </Portal>
                 {isPhone ? (
@@ -152,7 +201,7 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                                     : theme.colors.button,
                                 fontWeight: activeList === 'income' ? 'bold' : 'normal'
                             }}>
-                                Income
+                                {t('income')}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -174,7 +223,7 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                                     : theme.colors.button,
                                 fontWeight: activeList === 'expenditure' ? 'bold' : 'normal'
                             }}>
-                                Expenditure
+                                {t('expenditure')}
                             </Text>
                         </TouchableOpacity>
 
@@ -191,7 +240,7 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                 {!isPhone && (
                     <View style={styles.titlesContainer}>
                         <View style={styles.titleWithButton}>
-                            <Text style={[styles.listTitle, { color: theme.colors.text }]}>Income</Text>
+                            <Text style={[styles.listTitle, { color: theme.colors.text }]}>{t('income')}</Text>
                             <Button
                                 mode="contained"
                                 style={[styles.addButton, { backgroundColor: theme.colors.button }]}
@@ -199,11 +248,11 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                                 labelStyle={{ color: theme.colors.text }}
                                 onPress={() => handleAddPress('income')}
                             >
-                                Add
+                                {t('addIncome')}
                             </Button>
                         </View>
                         <View style={styles.titleWithButton}>
-                            <Text style={[styles.listTitle, { color: theme.colors.text }]}>Expenditure</Text>
+                            <Text style={[styles.listTitle, { color: theme.colors.text }]}>{t('expenditure')}</Text>
                             <Button
                                 mode="contained"
                                 style={[styles.addButton, { backgroundColor: theme.colors.button }]}
@@ -211,7 +260,7 @@ const QuarterScreen = ({ navigation, route, theme }) => {
                                 labelStyle={{ color: theme.colors.text }}
                                 onPress={() => handleAddPress('expenditure')}
                             >
-                                Add
+                                {t('addExpenditure')}
                             </Button>
                         </View>
                     </View>
@@ -301,4 +350,3 @@ const styles = StyleSheet.create({
 });
 
 export default QuarterScreen;
-
