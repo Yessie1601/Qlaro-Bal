@@ -3,7 +3,6 @@ import { StyleSheet, ScrollView, View, Modal, Text } from 'react-native';
 import { TextInput, Button, Divider, Snackbar, Switch } from 'react-native-paper';
 import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
-import XLSX from 'xlsx';
 import { getSettings, updateSettings, exportData, getCurrency, setCurrency, addTransaction } from '../services/storageService';
 import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,18 +10,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Picker } from '@react-native-picker/picker';
 import { supportedLanguages, setLanguage, getCurrentLanguage, t  } from '../i18n';
 
-
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
     { label: 'EUR', symbol: '€', icon: 'currency-eur' },
     { label: 'GBP', symbol: '£', icon: 'currency-gbp' },
     { label: 'JPY', symbol: '¥', icon: 'currency-jpy' },
     { label: 'INR', symbol: '₹', icon: 'currency-inr' },
-];
-
-const fileTypeOptions = [
-    { label: 'Excel (.xlsx)', value: 'xlsx' },
-    { label: 'CSV (.csv)', value: 'csv' }
 ];
 
 const parseQuarterStart = (str) => {
@@ -50,14 +43,12 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [exportModalVisible, setExportModalVisible] = useState(false);
     const [importModalVisible, setImportModalVisible] = useState(false);
-    const [importFileType, setImportFileType] = useState('xlsx');
-    const currentYear = new Date().getFullYear();
-    const yearOptions = Array.from({length: 8}, (_, i) => currentYear - 5 + i);
-    const [exportYear, setExportYear] = useState(currentYear);
+    const [exportYear, setExportYear] = useState(new Date().getFullYear());
     const [exportQuarter, setExportQuarter] = useState('All');
     const [exportType, setExportType] = useState('Both');
-    const [exportFileType, setExportFileType] = useState('xlsx');
     const [selectedLanguage, setSelectedLanguage] = useState(getCurrentLanguage());
+    const currentYear = new Date().getFullYear();
+    const yearOptions = Array.from({length: 8}, (_, i) => currentYear - 5 + i);
 
     useEffect(() => {
         loadSettings();
@@ -147,11 +138,8 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const handleExportConfirm = async () => {
         setExportModalVisible(false);
         try {
-            const fileUri = await exportData(exportYear, exportQuarter, exportType, exportFileType);
-            const mimeType =
-                exportFileType === 'csv'
-                    ? 'text/csv'
-                    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            const fileUri = await exportData(exportYear, exportQuarter, exportType, 'xlsx');
+            const mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             await Sharing.shareAsync(fileUri, {
                 mimeType,
                 dialogTitle: 'Share exported data'
@@ -170,9 +158,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
         setImportModalVisible(false);
         try {
             const result = await DocumentPicker.getDocumentAsync({
-                type: importFileType === 'csv'
-                    ? 'text/csv'
-                    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                type: 'text/csv'
             });
 
             const asset = result.assets && result.assets[0];
@@ -190,30 +176,21 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
             }
 
             let importedData = [];
-            if (importFileType === 'csv') {
-                const text = new TextDecoder().decode(fileContent);
-                const lines = text.split('\n').filter(l => l.trim().length > 0);
-                if (lines.length < 2) {
-                    showSnackbar('CSV file is empty or invalid');
-                    return;
-                }
-                const [headerLine, ...dataLines] = lines;
-                const headers = headerLine.split(',').map(h => h.replace(/"/g, '').trim());
-                importedData = dataLines.map(line => {
-                    const values = line.split(',').map(v => v.replace(/"/g, '').trim());
-                    const obj = {};
-                    headers.forEach((h, i) => obj[h] = values[i]);
-                    return obj;
-                });
-            } else {
-                const workbook = XLSX.read(fileContent, {type: 'array'});
-                const sheetName = workbook.SheetNames[0];
-                importedData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                if (!importedData.length) {
-                    showSnackbar('Excel file is empty or invalid');
-                    return;
-                }
+            const text = new TextDecoder().decode(fileContent);
+            const lines = text.split('\n').filter(l => l.trim().length > 0);
+            if (lines.length < 2) {
+                showSnackbar('CSV file is empty or invalid');
+                return;
             }
+            const [headerLine, ...dataLines] = lines;
+            const headers = headerLine.split(',').map(h => h.replace(/"/g, '').trim());
+            importedData = dataLines.map(line => {
+                const values = line.split(',').map(v => v.replace(/"/g, '').trim());
+                const obj = {};
+                headers.forEach((h, i) => obj[h] = values[i]);
+                return obj;
+            });
+
             if (!importedData.length) {
                 showSnackbar('No data found to import');
                 return;
@@ -519,14 +496,13 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                                 marginBottom: 8
                             }}>
                                 <Picker
-                                    selectedValue={exportFileType}
-                                    onValueChange={setExportFileType}
+                                    selectedValue="xlsx"
+                                    onValueChange={() => {}}
                                     style={{color: theme.colors.text}}
                                     dropdownIconColor={theme.colors.button}
+                                    enabled={false}
                                 >
-                                    {fileTypeOptions.map(opt => (
-                                        <Picker.Item key={opt.value} label={opt.label} value={opt.value}/>
-                                    ))}
+                                    <Picker.Item label="Excel (.xlsx)" value="xlsx"/>
                                 </Picker>
                             </View>
                             <Text style={{color: theme.colors.text, marginTop: 8}}>{t('year')}</Text>
@@ -618,22 +594,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                     }}>
                         <Text style={{color: theme.colors.text, fontSize: 20, fontWeight: 'bold'}}>{t('importOptions')}</Text>
                         <Text style={{color: theme.colors.text, marginTop: 8}}>{t('fileType')}</Text>
-                        <View style={{
-                            borderWidth: 1,
-                            borderColor: theme.colors.button,
-                            borderRadius: 8,
-                            marginBottom: 8
-                        }}>
-                            <Picker
-                                selectedValue={importFileType}
-                                onValueChange={setImportFileType}
-                                style={{color: theme.colors.text}}
-                                dropdownIconColor={theme.colors.button}
-                            >
-                                <Picker.Item label={fileTypeOptions[0].label} value="xlsx"/>
-                                <Picker.Item label={fileTypeOptions[1].label} value="csv"/>
-                            </Picker>
-                        </View>
+                        <Text style={{color: theme.colors.text, marginBottom: 8}}>CSV (.csv)</Text>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 16}}>
                             <Button onPress={() => setImportModalVisible(false)}>{t('cancel')}</Button>
                             <Button

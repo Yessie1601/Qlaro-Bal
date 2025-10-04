@@ -1,4 +1,3 @@
-// services/storageService.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { writeAsStringAsync, documentDirectory } from 'expo-file-system/legacy';
 import moment from 'moment';
@@ -96,8 +95,7 @@ export const getTotals = async (year) => {
 
 export const exportData = async (year, quarter, type, fileType = 'xlsx') => {
     try {
-        const transactions = JSON.parse(await AsyncStorage.getItem(TRANSACTIONS_KEY)) || [];
-        let filtered = transactions;
+        let filtered = JSON.parse(await AsyncStorage.getItem(TRANSACTIONS_KEY)) || [];
         if (year) filtered = filtered.filter(t => (t.year || new Date(t.date).getFullYear()) === year);
         if (quarter && quarter !== 'All') filtered = filtered.filter(t => t.quarter === Number(quarter));
         if (type && type !== 'Both') filtered = filtered.filter(t => t.type === type);

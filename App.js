@@ -8,7 +8,6 @@ import HomeScreen from './screens/HomeScreen';
 import QuarterScreen from './screens/QuarterScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import IntroScreen from './screens/IntroScreen';
-import SelectOptionsScreen from './screens/SelectOptionsScreen'; // <-- Add this import
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import SplashScreen from './components/SplashScreen';
@@ -130,18 +129,6 @@ export default function App() {
                     <Stack.Screen name="Intro" options={{ headerShown: false }}>
                         {(props) => (
                             <IntroScreen
-                                {...props}
-                                theme={theme}
-                                language={language}
-                                setLanguage={handleSetLanguage}
-                                currency={currency}
-                                setCurrency={handleSetCurrency}
-                            />
-                        )}
-                    </Stack.Screen>
-                    <Stack.Screen name="SelectOptions">
-                        {(props) => (
-                            <SelectOptionsScreen
                                 {...props}
                                 theme={theme}
                                 language={language}

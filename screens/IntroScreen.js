@@ -3,11 +3,12 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { t } from '../i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const IntroScreen = ({ navigation, theme, onIntroSeen }) => {
-    const handleStart = async () => {
-        if (onIntroSeen) await onIntroSeen();
-        navigation.navigate('SelectOptions', { theme });
+const IntroScreen = ({ navigation, theme }) => {
+    const handleGetStarted = async () => {
+        await AsyncStorage.setItem('introSeen', 'true');
+        navigation.replace('Home', { theme });
     };
 
     return (
@@ -24,11 +25,11 @@ const IntroScreen = ({ navigation, theme, onIntroSeen }) => {
                 <Text style={styles.subtitle}>{t('trackByQuarter')}</Text>
                 <Button
                     mode="contained"
-                    style={{ backgroundColor: theme.colors.button, marginTop: 32 }}
+                    style={{ backgroundColor: theme.colors.button, marginTop: 16 }}
                     labelStyle={{ color: theme.colors.text }}
-                    onPress={handleStart}
+                    onPress={handleGetStarted}
                 >
-                    Select Language & Currency
+                    {t('getStarted')}
                 </Button>
             </View>
         </LinearGradient>
@@ -43,14 +44,15 @@ const styles = StyleSheet.create({
         padding: 24,
     },
     title: {
-        color: '#5865F2',
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: 'bold',
-        marginBottom: 24,
+        color: '#5865F2',
+        marginBottom: 16,
+        textAlign: 'center',
     },
     subtitle: {
-        color: '#060607',
         fontSize: 18,
+        color: '#060607',
         marginBottom: 32,
         textAlign: 'center',
     },
