@@ -21,20 +21,20 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.yessie.Qlaro"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "node_modules/react-native-paper/fonts/MaterialCommunityIcons.ttf"
-          ]
-        }
-      ]
-    ]
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "4af5787a-133a-4df0-8e0c-809f65069508"
+      }
+    }
   }
 }

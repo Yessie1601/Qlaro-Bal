@@ -17,7 +17,7 @@ const currencyOptions = [
 
 const PHONE_WIDTH = 600;
 
-const QuarterScreen = ({ navigation, theme }) => {
+const QuarterScreen = ({ navigation, route, theme }) => {
     const { quarter, startDate, year } = route.params;
     const [incomeTransactions, setIncomeTransactions] = useState([]);
     const [expenditureTransactions, setExpenditureTransactions] = useState([]);
@@ -37,7 +37,7 @@ const QuarterScreen = ({ navigation, theme }) => {
 
         loadTransactions();
         loadCurrency();
-    }, [quarter, startDate, year]);
+    }, []);
 
     const loadTransactions = async () => {
         try {
