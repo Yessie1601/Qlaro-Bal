@@ -43,6 +43,9 @@ jobs:
 
       - name: Build Android app
         run: eas build --platform android --profile production --local --output ${{ github.workspace }}/Qlaro-Bal.apk
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_NO_VCS: 1
 
       - name: Gets latest created release info
         id: latest_release_info
