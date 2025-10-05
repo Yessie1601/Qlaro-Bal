@@ -1,7 +1,7 @@
 export default {
     isRequired: "is verplicht",
     isInvalid: "is ongeldig",
-    welcome: "Welkom bij Qlaro!",
+    welcome: "Welkom bij Qlaro-Bal !",
     trackByQuarter: "Volg je inkomsten en uitgaven per kwartaal en zie waar je staat.",
     getStarted: "Start",
     income: "Inkomen",

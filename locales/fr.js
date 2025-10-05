@@ -1,7 +1,7 @@
 export default {
     isRequired: "est requis",
     isInvalid: "est invalide",
-    welcome: "Bienvenue sur Qlaro !",
+    welcome: "Bienvenue sur Qlaro-Bal !",
     trackByQuarter: "Suivez vos revenus et dépenses par trimestre pour voir où vous en êtes.",
     getStarted: "Commencer",
     income: "Revenu",

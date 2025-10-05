@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Qlaro",
+    "name": "Qlaro-Bal",
     "slug": "Qlaro",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yessie.Qlaro",
+      "bundleIdentifier": "com.yessie.Qlaro-Bal",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -29,12 +29,13 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
       ],
-      "package": "com.yessie.Qlaro"
+      "package": "com.yessie.Qlaro.Bal"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [],
+    "owner": "yessie",
     "extra": {
       "eas": {
         "projectId": "4af5787a-133a-4df0-8e0c-809f65069508"

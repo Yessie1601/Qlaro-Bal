@@ -19,7 +19,7 @@ const SplashScreen = ({ onFinish, theme }) => {
         >
         <View style={styles.container}>
             <Image source={require('../assets/icon.png')} style={styles.logo} />
-            <Text>Qlaro</Text>
+            <Text>Qlaro-Bal</Text>
         </View>
         </LinearGradient>
     );
