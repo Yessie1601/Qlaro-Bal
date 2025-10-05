@@ -1,4 +1,6 @@
 export default {
+    isRequired: "is required",
+    isInvalid: "is invalid",
     welcome: "Welcome to Qlaro!",
     trackByQuarter: "Track your income and expenditure by quarter to see where you stand.",
     getStarted: "Get Started",

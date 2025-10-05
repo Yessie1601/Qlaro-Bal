@@ -46,6 +46,7 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [exportYear, setExportYear] = useState(new Date().getFullYear());
     const [exportQuarter, setExportQuarter] = useState('All');
     const [exportType, setExportType] = useState('Both');
+    const [exportFileType, setExportFileType] = useState('xlsx');
     const [selectedLanguage, setSelectedLanguage] = useState(getCurrentLanguage());
     const currentYear = new Date().getFullYear();
     const yearOptions = Array.from({length: 8}, (_, i) => currentYear - 5 + i);
@@ -138,8 +139,10 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const handleExportConfirm = async () => {
         setExportModalVisible(false);
         try {
-            const fileUri = await exportData(exportYear, exportQuarter, exportType, 'xlsx');
-            const mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            const fileUri = await exportData(exportYear, exportQuarter, exportType, exportFileType);
+            const mimeType = exportFileType === 'csv'
+                ? 'text/csv'
+                : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             await Sharing.shareAsync(fileUri, {
                 mimeType,
                 dialogTitle: 'Share exported data'
@@ -496,13 +499,13 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                                 marginBottom: 8
                             }}>
                                 <Picker
-                                    selectedValue="xlsx"
-                                    onValueChange={() => {}}
+                                    selectedValue={exportFileType}
+                                    onValueChange={setExportFileType}
                                     style={{color: theme.colors.text}}
                                     dropdownIconColor={theme.colors.button}
-                                    enabled={false}
                                 >
                                     <Picker.Item label="Excel (.xlsx)" value="xlsx"/>
+                                    <Picker.Item label="CSV (.csv)" value="csv"/>
                                 </Picker>
                             </View>
                             <Text style={{color: theme.colors.text, marginTop: 8}}>{t('year')}</Text>
@@ -640,3 +643,4 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreen;
+

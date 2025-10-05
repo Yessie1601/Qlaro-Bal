@@ -151,10 +151,9 @@ export const setCurrency = async (currency) => {
     await AsyncStorage.setItem(CURRENCY_KEY, currency);
 };
 
-export const deleteTransaction = async (quarter, type, date) => {
+export const deleteTransaction = async (id) => {
     const transactions = JSON.parse(await AsyncStorage.getItem(TRANSACTIONS_KEY)) || [];
-    const filtered = transactions.filter(
-        t => !(t.quarter === quarter && t.type === type && t.date === date)
-    );
+    const filtered = transactions.filter(t => t.id !== id);
     await AsyncStorage.setItem(TRANSACTIONS_KEY, JSON.stringify(filtered));
 };
+

@@ -3,9 +3,9 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Dimensions } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from 'react-native-paper';
 import QuarterCard from '../components/QuarterCard';
-import { getCurrency, getSettings, getTotals, initDatabase } from '../services/storageService';
+import { getCurrency, getSettings, initDatabase, getTransactions } from '../services/storageService';
 import { LinearGradient } from 'expo-linear-gradient';
-import {t} from '../i18n';
+import { t } from '../i18n';
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -27,13 +27,13 @@ const HomeScreen = ({ navigation, theme }) => {
         q4_start: ''
     });
     const [selectedYear, setSelectedYear] = useState(currentYear);
-    const [totals, setTotals] = useState({
-        1: { income: 0, expenditure: 0 },
-        2: { income: 0, expenditure: 0 },
-        3: { income: 0, expenditure: 0 },
-        4: { income: 0, expenditure: 0 }
-    });
     const [currency, setCurrency] = useState('USD');
+    const [quarterWithTax, setQuarterWithTax] = useState({
+        1: { incomeTotalWithTax: 0, expenditureTotalWithTax: 0 },
+        2: { incomeTotalWithTax: 0, expenditureTotalWithTax: 0 },
+        3: { incomeTotalWithTax: 0, expenditureTotalWithTax: 0 },
+        4: { incomeTotalWithTax: 0, expenditureTotalWithTax: 0 }
+    });
     const scrollViewRef = useRef();
 
     useEffect(() => {
@@ -42,22 +42,22 @@ const HomeScreen = ({ navigation, theme }) => {
                 await initDatabase();
                 const settingsData = await getSettings();
                 setSettings(settingsData);
-                const totalsData = await getTotals(selectedYear);
-                const formattedTotals = {
-                    1: { income: 0, expenditure: 0 },
-                    2: { income: 0, expenditure: 0 },
-                    3: { income: 0, expenditure: 0 },
-                    4: { income: 0, expenditure: 0 }
-                };
 
-                totalsData.forEach(item => {
-                    formattedTotals[item.quarter] = {
-                        income: item.income_total || 0,
-                        expenditure: item.expenditure_total || 0
-                    };
-                });
+                // Calculate total with tax for each quarter
+                const taxTotals = {};
+                for (let q = 1; q <= 4; q++) {
+                    const incomeTx = await getTransactions(q, 'income', selectedYear);
+                    const expenditureTx = await getTransactions(q, 'expenditure', selectedYear);
 
-                setTotals(formattedTotals);
+                    const incomeTotalWithTax = incomeTx.reduce(
+                        (sum, t) => sum + t.amount + (t.amount * (t.tax ?? 0) / 100), 0
+                    );
+                    const expenditureTotalWithTax = expenditureTx.reduce(
+                        (sum, t) => sum + t.amount + (t.amount * (t.tax ?? 0) / 100), 0
+                    );
+                    taxTotals[q] = { incomeTotalWithTax, expenditureTotalWithTax };
+                }
+                setQuarterWithTax(taxTotals);
 
                 const curr = await getCurrency();
                 setCurrency(curr);
@@ -89,26 +89,27 @@ const HomeScreen = ({ navigation, theme }) => {
         setSelectedYear(year);
     };
 
-    const calculateYearlyTotals = () => {
-        let totalIncome = 0;
-        let totalExpenditure = 0;
+    // Calculate yearly totals with tax
+    const calculateYearlyTotalsWithTax = () => {
+        let totalIncomeWithTax = 0;
+        let totalExpenditureWithTax = 0;
 
-        Object.values(totals).forEach(quarter => {
-            totalIncome += quarter.income;
-            totalExpenditure += quarter.expenditure;
+        Object.values(quarterWithTax).forEach(q => {
+            totalIncomeWithTax += q.incomeTotalWithTax || 0;
+            totalExpenditureWithTax += q.expenditureTotalWithTax || 0;
         });
 
         return {
-            income: totalIncome,
-            expenditure: totalExpenditure,
-            balance: totalIncome - totalExpenditure
+            incomeTotalWithTax: totalIncomeWithTax,
+            expenditureTotalWithTax: totalExpenditureWithTax,
+            balance: totalIncomeWithTax - totalExpenditureWithTax
         };
     };
 
     const currencyObj = currencyOptions.find(c => c.label === currency) || currencyOptions[0];
     const currencySymbol = currencyObj.symbol;
     const currencyIcon = currencyObj.icon;
-    const yearlyTotals = calculateYearlyTotals();
+    const yearlyTotalsWithTax = calculateYearlyTotalsWithTax();
 
     return (
         <LinearGradient
@@ -131,21 +132,21 @@ const HomeScreen = ({ navigation, theme }) => {
                     style={styles.yearSummary}
                 >
                     <View style={{ alignItems: 'center', width: '100%' }}>
-                        <Text style={{ color: theme.colors.text, fontSize: 20, padding: 2 }}>
-                            {t('income')}: {currencySymbol}{yearlyTotals.income.toFixed(2)}
+                        <Text style={{ color: theme.colors.text, fontSize: 20, fontWeight: 'bold', padding: 2 }}>
+                            {t('income')}: {currencySymbol}{yearlyTotalsWithTax.incomeTotalWithTax.toFixed(2)}
                         </Text>
-                        <Text style={{ color: theme.colors.text, fontSize: 20, padding: 2 }}>
-                            {t('expenditure')}: {currencySymbol}{yearlyTotals.expenditure.toFixed(2)}
+                        <Text style={{ color: theme.colors.text, fontSize: 20, fontWeight: 'bold', padding: 2 }}>
+                            {t('expenditure')}: {currencySymbol}{yearlyTotalsWithTax.expenditureTotalWithTax.toFixed(2)}
                         </Text>
                         <Text
                             style={{
                                 fontWeight: 'bold',
                                 fontSize: 24,
-                                color: yearlyTotals.balance >= 0 ? theme.colors.success : theme.colors.danger,
+                                color: yearlyTotalsWithTax.balance >= 0 ? theme.colors.success : theme.colors.danger,
                                 padding: 2,
                             }}
                         >
-                            {t('balance')}: {currencySymbol}{yearlyTotals.balance.toFixed(2)}
+                            {t('balance')}: {currencySymbol}{yearlyTotalsWithTax.balance.toFixed(2)}
                         </Text>
 
                         <View style={styles.yearSelectorContainer}>
@@ -185,74 +186,26 @@ const HomeScreen = ({ navigation, theme }) => {
 
                 <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
                     <View style={styles.container}>
-                        <QuarterCard
-                            quarter={1}
-                            startDate={`${selectedYear}-${settings.q1_start}`}
-                            income={totals[1].income}
-                            expenditure={totals[1].expenditure}
-                            onPress={() =>
-                                navigation.navigate('Quarter', {
-                                    quarter: 1,
-                                    startDate: settings.q1_start,
-                                    year: selectedYear,
-                                    theme,
-                                })
-                            }
-                            currencySymbol={currencySymbol}
-                            currencyIcon={currencyIcon}
-                            theme={theme}
-                        />
-                        <QuarterCard
-                            quarter={2}
-                            startDate={`${selectedYear}-${settings.q2_start}`}
-                            income={totals[2].income}
-                            expenditure={totals[2].expenditure}
-                            onPress={() =>
-                                navigation.navigate('Quarter', {
-                                    quarter: 2,
-                                    startDate: settings.q2_start,
-                                    year: selectedYear,
-                                    theme,
-                                })
-                            }
-                            currencySymbol={currencySymbol}
-                            currencyIcon={currencyIcon}
-                            theme={theme}
-                        />
-                        <QuarterCard
-                            quarter={3}
-                            startDate={`${selectedYear}-${settings.q3_start}`}
-                            income={totals[3].income}
-                            expenditure={totals[3].expenditure}
-                            onPress={() =>
-                                navigation.navigate('Quarter', {
-                                    quarter: 3,
-                                    startDate: settings.q3_start,
-                                    year: selectedYear,
-                                    theme,
-                                })
-                            }
-                            currencySymbol={currencySymbol}
-                            currencyIcon={currencyIcon}
-                            theme={theme}
-                        />
-                        <QuarterCard
-                            quarter={4}
-                            startDate={`${selectedYear}-${settings.q4_start}`}
-                            income={totals[4].income}
-                            expenditure={totals[4].expenditure}
-                            onPress={() =>
-                                navigation.navigate('Quarter', {
-                                    quarter: 4,
-                                    startDate: settings.q4_start,
-                                    year: selectedYear,
-                                    theme,
-                                })
-                            }
-                            currencySymbol={currencySymbol}
-                            currencyIcon={currencyIcon}
-                            theme={theme}
-                        />
+                        {[1, 2, 3, 4].map(q => (
+                            <QuarterCard
+                                key={q}
+                                quarter={q}
+                                startDate={`${selectedYear}-${settings[`q${q}_start`]}`}
+                                incomeTotalWithTax={quarterWithTax[q]?.incomeTotalWithTax || 0}
+                                expenditureTotalWithTax={quarterWithTax[q]?.expenditureTotalWithTax || 0}
+                                onPress={() =>
+                                    navigation.navigate('Quarter', {
+                                        quarter: q,
+                                        startDate: settings[`q${q}_start`],
+                                        year: selectedYear,
+                                        theme,
+                                    })
+                                }
+                                currencySymbol={currencySymbol}
+                                currencyIcon={currencyIcon}
+                                theme={theme}
+                            />
+                        ))}
 
                         <Button
                             mode="contained"
@@ -274,6 +227,7 @@ const styles = StyleSheet.create({
     yearSummary: {
         overflow: 'hidden',
         paddingBottom: 15,
+        paddingTop: 10,
         borderBottomLeftRadius: 30,
         borderBottomRightRadius: 30
     },

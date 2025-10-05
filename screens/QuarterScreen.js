@@ -93,11 +93,7 @@ const QuarterScreen = ({ navigation, route, theme }) => {
     const handleDeleteTransaction = async () => {
         if (selectedTransaction) {
             try {
-                await deleteTransaction(
-                    selectedTransaction.quarter,
-                    selectedTransaction.type,
-                    selectedTransaction.date
-                );
+                await deleteTransaction(selectedTransaction.id);
                 setDetailModalVisible(false);
                 setConfirmDeleteVisible(false);
                 loadTransactions();

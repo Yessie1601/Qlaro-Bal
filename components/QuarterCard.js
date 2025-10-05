@@ -5,16 +5,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import moment from 'moment';
 import { t } from '../i18n';
 
-const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currencySymbol = '$', theme }) => {
+const QuarterCard = ({
+                         quarter,
+                         startDate,
+                         incomeTotalWithTax = 0,
+                         expenditureTotalWithTax = 0,
+                         onPress,
+                         currencySymbol = '$',
+                         theme
+                     }) => {
     const formattedDate = moment(startDate).format('MMM D');
-    const balance = income - expenditure;
+    const balance = incomeTotalWithTax - expenditureTotalWithTax;
 
     return (
         <LinearGradient
             colors={theme.dark
                 ? ['#232428', '#2b2d31']
                 : ['#f2f3f5', '#ffffff']}
-            style={{ marginVertical: 20, borderRadius: 50 }}
+            style={{ marginVertical: 10, borderRadius: 50 }}
         >
             <Card
                 style={{
@@ -36,13 +44,13 @@ const QuarterCard = ({ quarter, startDate, income, expenditure, onPress, currenc
                     </Text>
 
                     <View style={styles.row}>
-                        <Text style={{ color: theme.colors.text, padding: 2 }}>
-                            {t('income')}: {currencySymbol}{income.toFixed(2)}
+                        <Text style={{ color: theme.colors.text , padding: 2 }}>
+                            {t('income')}: {currencySymbol}{incomeTotalWithTax.toFixed(2)}
                         </Text>
                     </View>
                     <View style={styles.row}>
-                        <Text style={{ color: theme.colors.text, padding: 2 }}>
-                            {t('expenditure')}: {currencySymbol}{expenditure.toFixed(2)}
+                        <Text style={{ color: theme.colors.text , padding: 2 }}>
+                            {t('expenditure')}: {currencySymbol}{expenditureTotalWithTax.toFixed(2)}
                         </Text>
                     </View>
                     <View style={styles.row}>
@@ -81,8 +89,9 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        marginVertical: 2,
     },
 });
 
 export default QuarterCard;
-
