@@ -8,7 +8,7 @@ import moment from 'moment';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Picker } from '@react-native-picker/picker';
-import { supportedLanguages, setLanguage, getCurrentLanguage, t  } from '../i18n';
+import { supportedLanguages, t } from '../i18n';
 
 const currencyOptions = [
     { label: 'USD', symbol: '$', icon: 'currency-usd' },
@@ -29,7 +29,7 @@ const parseQuarterStart = (str) => {
     return { month: '01', day: '01' };
 };
 
-const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
+const SettingsScreen = ({navigation, darkMode, setDarkMode, theme, language, setLanguage}) => {
     const [q1Month, setQ1Month] = useState('01');
     const [q1Day, setQ1Day] = useState('01');
     const [q2Month, setQ2Month] = useState('04');
@@ -47,7 +47,6 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
     const [exportQuarter, setExportQuarter] = useState('All');
     const [exportType, setExportType] = useState('Both');
     const [exportFileType, setExportFileType] = useState('xlsx');
-    const [selectedLanguage, setSelectedLanguage] = useState(getCurrentLanguage());
     const currentYear = new Date().getFullYear();
     const yearOptions = Array.from({length: 8}, (_, i) => currentYear - 5 + i);
 
@@ -255,11 +254,8 @@ const SettingsScreen = ({ navigation, darkMode, setDarkMode, theme }) => {
                         backgroundColor: theme.colors.surface
                     }}>
                         <Picker
-                            selectedValue={selectedLanguage}
-                            onValueChange={lang => {
-                                setSelectedLanguage(lang);
-                                setLanguage(lang);
-                            }}
+                            selectedValue={language}
+                            onValueChange={lang => setLanguage(lang)}
                             style={{color: theme.colors.text}}
                             dropdownIconColor={theme.colors.button}
                         >
@@ -643,4 +639,3 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreen;
-
