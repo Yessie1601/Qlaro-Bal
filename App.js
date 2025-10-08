@@ -10,6 +10,7 @@ import IntroScreen from './screens/IntroScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import SplashScreen from './components/SplashScreen';
+import { setLanguage as setI18nLanguage } from './i18n';
 
 const Stack = createStackNavigator();
 
@@ -82,7 +83,10 @@ export default function App() {
             const intro = await AsyncStorage.getItem('introSeen');
             setIntroSeen(intro === 'true');
             const lang = await AsyncStorage.getItem('language');
-            if (lang) setLanguage(lang);
+            if (lang) {
+                setLanguage(lang);
+                setI18nLanguage(lang);
+            }
             const curr = await AsyncStorage.getItem('currency');
             if (curr) setCurrency(curr);
         })();
@@ -90,6 +94,7 @@ export default function App() {
 
     const handleSetLanguage = async (lang) => {
         setLanguage(lang);
+        setI18nLanguage(lang);
         await AsyncStorage.setItem('language', lang);
     };
 

@@ -43,7 +43,6 @@ const HomeScreen = ({ navigation, theme }) => {
                 const settingsData = await getSettings();
                 setSettings(settingsData);
 
-                // Calculate total with tax for each quarter
                 const taxTotals = {};
                 for (let q = 1; q <= 4; q++) {
                     const incomeTx = await getTransactions(q, 'income', selectedYear);
@@ -89,7 +88,6 @@ const HomeScreen = ({ navigation, theme }) => {
         setSelectedYear(year);
     };
 
-    // Calculate yearly totals with tax
     const calculateYearlyTotalsWithTax = () => {
         let totalIncomeWithTax = 0;
         let totalExpenditureWithTax = 0;
